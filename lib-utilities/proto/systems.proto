@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = systems;
+package systems;
 
 option go_package = "/systems";
 

@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = task;
+package task;
 
 option go_package = "/task";
 

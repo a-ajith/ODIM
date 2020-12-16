@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = chassis;
+package chassis;
 
 option go_package = "/chassis";
 
