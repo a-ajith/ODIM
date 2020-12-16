@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	dmtfmodel "github.com/ODIM-Project/ODIM/lib-dmtf/model"
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
@@ -203,7 +204,7 @@ func SaveChassis(chassis dmtfmodel.Chassis, deviceUUID string) error {
 	return nil
 }
 
-//GenericSave will save any resource data into the database
+// GenericSave will save any resource data into the database
 func GenericSave(body []byte, table string, key string) error {
 
 	connPool, err := common.GetDBConnection(common.InMemory)
@@ -260,6 +261,23 @@ func DeleteComputeSystem(index int, key string) *errors.Error {
 	// Check key present in the DB
 	if _, err = connPool.Read("ComputerSystem", key); err != nil {
 		return errors.PackError(err.ErrNo(), "error while trying to get compute details: ", err.Error())
+	}
+	var computeData, inventoryData []string
+	editedKeyList := strings.Split(key, "/")
+	editedKey := editedKeyList[len(editedKeyList)-1]
+	systemID := strings.Split(editedKey, ":")[0]
+	if computeData, err = connPool.GetAllMatchingDetails("ComputerSystem", systemID); err != nil {
+		return errors.PackError(err.ErrNo(), "error while trying to get ComputerSystem details: ", err.Error())
+	}
+	if len(computeData) == 1 {
+		if inventoryData, err = connPool.GetAllMatchingDetails("FirmwareInventory", systemID); err != nil {
+			return errors.PackError(err.ErrNo(), "error while trying to get compute details: ", err.Error())
+		}
+		for _, value := range inventoryData {
+			if err = connPool.Delete("FirmwareInventory", value); err != nil {
+				return errors.PackError(err.ErrNo(), "error while trying to delete compute details: ", err.Error())
+			}
+		}
 	}
 
 	//Delete All resources
@@ -896,6 +914,37 @@ func UpdateConnectionMethod(connectionMethod ConnectionMethod, key string) *erro
 	}
 	if _, err := conn.Update("ConnectionMethod", key, connectionMethod); err != nil {
 		return err
+	}
+	return nil
+}
+
+// CheckActiveRequest will check the DB to see whether there are any active requests for the given key
+// It will return true if there is an active request or false if not
+// It will also through an error if any DB connection issues arise
+func CheckActiveRequest(key string) (bool, *errors.Error) {
+	conn, err := common.GetDBConnection(common.InMemory)
+	if err != nil {
+		return false, errors.PackError(err.ErrNo(), "error: while trying to create connection with DB: ", err.Error())
+	}
+	_, err = conn.Read("ActiveAddBMCRequest", key)
+	if err != nil {
+		if errors.DBKeyNotFound == err.ErrNo() {
+			return false, nil
+		}
+		return false, errors.PackError(err.ErrNo(), "error: while trying to fetch active connection details: ", err.Error())
+	}
+	return true, nil
+}
+
+// DeleteActiveRequest deletes the active request key from the DB, return error if any
+func DeleteActiveRequest(key string) *errors.Error {
+	conn, err := common.GetDBConnection(common.InMemory)
+	if err != nil {
+		return errors.PackError(err.ErrNo(), "error: while trying to create connection with DB: ", err.Error())
+	}
+	err = conn.Delete("ActiveAddBMCRequest", key)
+	if err != nil {
+		return errors.PackError(err.ErrNo(), "error: while trying to delete active connection details: ", err.Error())
 	}
 	return nil
 }
