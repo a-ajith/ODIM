@@ -26,17 +26,6 @@ sudo cp protoc /usr/bin
 cd ../include
 sudo cp -r google /usr/local/include/
 cd
-#export GO111MODULE=on
-#go get github.com/micro/micro/v3
-#cd "$GOPATH"/src/github.com/micro/micro
-#OLD="google.golang.org/grpc v1.27.0"
-#NEW="google.golang.org/grpc v1.26.0"
-#file=go.mod
-
-#sed "s|$OLD|$NEW|g" $file
-#go build -o protoc-gen-micro
-#sudo cp protoc-gen-micro /usr/bin
-#cd
 go install github.com/micro/protoc-gen-micro
 go install google.golang.org/protobuf/cmd/protoc-gen-go
 cd "$GOBIN"
@@ -50,12 +39,7 @@ for entry in ./*
 do
   if [[ "$entry" == *"$sub" ]];
   then
-#    dir_name="${entry//.proto}"
-#    mkdir "$dir_name"
-#    cp "$entry" "$dir_name"
-#    cd "$dir_name"
     sudo protoc -I /usr/local/include/ --proto_path=$GOPATH/src:. --micro_out=. --go_out=. "$entry"
-#    cd ..
   else
     sudo rm -rf "$entry"
   fi
