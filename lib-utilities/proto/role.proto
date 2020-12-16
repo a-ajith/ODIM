@@ -14,6 +14,9 @@
 
 syntax = "proto3";
 
+package = "role";
+
+option go_package = "/role";
 
 service Roles{
     rpc CreateRole(RoleRequest) returns (RoleResponse){}

@@ -14,6 +14,10 @@
 
 syntax = "proto3";
 
+package = "managers";
+
+option go_package = "/managers";
+
 service Managers {
     rpc GetManagersCollection(ManagerRequest) returns (ManagerResponse) {}
     rpc GetManager(ManagerRequest) returns (ManagerResponse) {}

@@ -14,6 +14,10 @@
 
 syntax = "proto3";
 
+package = "account";
+
+option go_package = "/account";
+
 service Account {
     rpc Create(CreateAccountRequest) returns (AccountResponse) {}
     rpc GetAllAccounts(AccountRequest) returns (AccountResponse) {}

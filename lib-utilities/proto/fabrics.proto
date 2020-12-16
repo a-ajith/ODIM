@@ -14,6 +14,10 @@
 
 syntax = "proto3";
 
+package = "fabrics";
+
+option go_package = "/fabrics";
+
 service Fabrics {
     rpc GetFabricResource(FabricRequest) returns(FabricResponse) {}
     rpc UpdateFabricResource(FabricRequest) returns (FabricResponse){}
