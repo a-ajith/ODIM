@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = "aggregator";
+package = aggregator;
 
 option go_package = "/aggregator";
 

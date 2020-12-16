@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = "managers";
+package = managers;
 
 option go_package = "/managers";
 

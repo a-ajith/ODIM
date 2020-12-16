@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = "account";
+package = account;
 
 option go_package = "/account";
 

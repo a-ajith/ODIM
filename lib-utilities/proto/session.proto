@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = "session";
+package = session;
 
 option go_package = "/session";
 

@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package = "events";
+package = events;
 
 option go_package = "/events";
 
