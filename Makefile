@@ -26,6 +26,7 @@ copy: build/odimra/odimra
 	cp -f lib-messagebus/platforms/platformconfig.toml build/RFPlugin/plugin_config/platformconfig.toml
 	cp -f lib-utilities/config/schema.json build/odimra/odimra_config/
 	cp -f lib-utilities/etc/* build/odimra/odimra_config/registrystore
+	cp -f build/generate_rpc_files.sh build/odimra/odimra
 
 dep: copy
 	build/odimra/makedep.sh
