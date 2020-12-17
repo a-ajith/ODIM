@@ -19,6 +19,8 @@ WORKDIR /odimra/
 
 COPY odimra/odimra .
 COPY odimra/builddep.sh .
-
+RUN  apt update
+RUN  apt-get -y install sudo
+RUN  apt-get -y install unzip
 RUN ./generate_rpc_files.sh
 RUN ./builddep.sh

@@ -45,8 +45,12 @@ all: standup-containers
 clean: 
 	build/cleanupbuild.sh
 
-deepclean: 
+deepclean: protoclean
 	build/deepcleanupbuild.sh
 
 proto:
 	build/generate_rpc_files.sh
+
+protoclean:
+	build/remove_rpc_files.sh
+

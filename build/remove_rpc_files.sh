@@ -14,35 +14,12 @@
 # under the License.
 
 cd lib-utilities/proto
-current_dir=$(pwd)
 
-wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-x86_64.zip
-mkdir proto_files
-# if unzip is not installed
-sudo apt install unzip
-unzip protoc-3.14.0-linux-x86_64.zip -d proto_files
-
-cd proto_files/bin
-sudo cp protoc /usr/bin
-cd ../include
-sudo cp -r google /usr/local/include/
-
-cd
-export GO111MODULE=on
-go install github.com/micro/protoc-gen-micro
-go install google.golang.org/protobuf/cmd/protoc-gen-go
-
-cd "$GOPATH"/bin
-sudo cp protoc-gen-go protoc-gen-micro /usr/bin
-
-cd "$current_dir"
 sub='.proto'
 for entry in ./*
 do
-  if [[ "$entry" == *"$sub" ]];
+  if [[ "$entry" != *"$sub" ]];
   then
-    sudo protoc -I /usr/local/include/ --proto_path=$GOPATH/src:. --micro_out=. --go_out=. "$entry"
-  else
     sudo rm -rf "$entry"
   fi
 done
