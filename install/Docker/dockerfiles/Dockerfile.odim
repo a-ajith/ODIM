@@ -32,6 +32,12 @@ COPY lib-persistence-manager /ODIM/lib-persistence-manager/
 COPY lib-rest-client /ODIM/lib-rest-client/
 COPY lib-utilities /ODIM/lib-utilities/
 
+COPY build/generate_rpc_files.sh /ODIM/.
+RUN apt update
+RUN apt-get -y install sudo
+RUN apt-get -y install unzip
+RUN cd /ODIM/ && ./generate_rpc_files.sh
+
 COPY install/Docker/dockerfiles/scripts/build_odim.sh .
 RUN ./build_odim.sh
 
