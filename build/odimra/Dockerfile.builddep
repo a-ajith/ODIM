@@ -19,4 +19,7 @@ WORKDIR /odimra/
 
 COPY odimra/odimra .
 COPY odimra/builddep.sh .
+COPY build/generate_rpc_files.sh ./odimra/
+
+RUN cd odimra/ && ./generate_rpc_files.sh
 RUN ./builddep.sh
