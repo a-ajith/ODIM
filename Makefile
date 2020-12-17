@@ -46,3 +46,6 @@ clean:
 
 deepclean: 
 	build/deepcleanupbuild.sh
+
+proto:
+	build/generate_rpc_files.sh
