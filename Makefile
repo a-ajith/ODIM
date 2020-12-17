@@ -39,13 +39,10 @@ standup-containers: build-containers
 down-containers:
 	cd build && docker-compose down
 
-all: proto standup-containers
+all: standup-containers
 
 clean: 
 	build/cleanupbuild.sh
 
 deepclean: 
 	build/deepcleanupbuild.sh
-
-proto:
-	build/generate_rpc_files.sh
