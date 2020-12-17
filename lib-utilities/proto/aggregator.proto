@@ -14,6 +14,10 @@
 
 syntax = "proto3";
 
+package aggregator;
+
+option go_package = "/aggregator";
+
 service Aggregator {
     rpc GetAggregationService(AggregatorRequest) returns (AggregatorResponse) {}
     rpc Reset(AggregatorRequest) returns (AggregatorResponse) {}
