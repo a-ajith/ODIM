@@ -65,6 +65,7 @@ jobs:
     
     - name: Build
       run: |
+          ./build/generate_rpc_files.sh
           LIST=`ls -R | grep -v 'lib-rest-client' | grep -E '^svc-|^plugin-'`
           for i in $LIST; do
             echo "Compiling $i"
