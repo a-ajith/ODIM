@@ -28,7 +28,7 @@ cd ../include
 sudo cp -r google /usr/local/include/
 
 cd
-if [[ "$GOPATH" == "";
+if [[ "$GOPATH" == "" ]];
 then
   mkdir go
   export GOPATH=/go
