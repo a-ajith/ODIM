@@ -34,15 +34,13 @@ then
   cd go
   export GOPATH=$(pwd)
 fi
-echo "$GOPATH"
-sudo sh -c 'export GO111MODULE=on && go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
+export GO111MODULE=on
+sudo cp $(which go) /usr/bin
+sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
 
 cd "$GOPATH"/bin
-pwd
-ls -lrt
 
 sudo cp protoc-gen-go protoc-gen-micro /usr/bin
-
 
 cd "$current_dir"
 sub='.proto'
