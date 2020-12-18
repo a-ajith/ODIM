@@ -30,9 +30,11 @@ sudo cp -r google /usr/local/include/
 cd
 if [[ "$GOPATH" == "" ]];
 then
-  mkdir go
-  export GOPATH=/go
+  sudo mkdir -p go/src go/bin go/pkg
+  cd go
+  export GOPATH=$(pwd)
 fi
+echo "$GOPATH"
 export GO111MODULE=on
 go install github.com/micro/protoc-gen-micro
 go install google.golang.org/protobuf/cmd/protoc-gen-go
