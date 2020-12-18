@@ -35,8 +35,7 @@ then
   export GOPATH=$(pwd)
 fi
 echo "$GOPATH"
-export GO111MODULE=on
-sudo sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
+sudo sh -c 'export GO111MODULE=on && go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
 
 cd "$GOPATH"/bin
 pwd
