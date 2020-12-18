@@ -33,7 +33,11 @@ go install github.com/micro/protoc-gen-micro
 go install google.golang.org/protobuf/cmd/protoc-gen-go
 
 cd "$GOPATH"/bin
+pwd
+ls -lrt
+
 sudo cp protoc-gen-go protoc-gen-micro /usr/bin
+
 
 cd "$current_dir"
 sub='.proto'
