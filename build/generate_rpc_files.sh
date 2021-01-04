@@ -36,10 +36,7 @@ then
 fi
 export GO111MODULE=on
 sudo cp $(which go) /usr/bin
-echo "========================="
-sudo go install github.com/micro/protoc-gen-micro && sudo go install google.golang.org/protobuf/cmd/protoc-gen-go
-echo "========================="
-#sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
+sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
 
 cd "$GOPATH"/bin
 
