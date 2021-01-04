@@ -70,9 +70,9 @@ jobs:
           for i in $LIST; do
             echo "Compiling $i"
             cd $i
-            go mod download
-            go mod vendor
-            go build -i .
+            sudo go mod download
+            sudo go mod vendor
+            sudo go build -i .
             if [ $? -eq 0 ]; then
               echo Build for odimra service/lib dependencies $i are Successful !!!!
               arr1+=$i;
