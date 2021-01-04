@@ -28,17 +28,22 @@ cd ../include
 sudo cp -r google /usr/local/include/
 
 cd
-if [[ "$GOPATH" == "" ]];
-then
-  sudo mkdir -p go/src go/bin go/pkg
-  cd go
-  export GOPATH=$(pwd)
-fi
-export GO111MODULE=on
-sudo cp $(which go) /usr/bin
-sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
-
+echo "================================"
+echo $GOPATH
+go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go
 cd "$GOPATH"/bin
+echo "================================"
+# if [[ "$GOPATH" == "" ]];
+# then
+#   sudo mkdir -p go/src go/bin go/pkg
+#   cd go
+#   export GOPATH=$(pwd)
+# fi
+# export GO111MODULE=on
+# sudo cp $(which go) /usr/bin
+# sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
+
+# cd "$GOPATH"/bin
 
 sudo cp protoc-gen-go protoc-gen-micro /usr/bin
 
