@@ -37,7 +37,7 @@ fi
 export GO111MODULE=on
 sudo cp $(which go) /usr/bin
 echo "======================================"
-echo go version
+echo $(go version)
 echo "======================================"
 sudo -E sh -c 'go install github.com/micro/protoc-gen-micro && go install google.golang.org/protobuf/cmd/protoc-gen-go'
 
