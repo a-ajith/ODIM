@@ -18,7 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"runtime"
@@ -47,13 +47,13 @@ func (a *Aggregator) GetAggregationService(ctx context.Context, req *aggregatorp
 		"Content-type":      "application/json; charset=utf-8",
 		"OData-Version":     "4.0",
 	}
-	// Validate the token, if user has Login privelege then proceed.
-	//Else send 401 Unautherised
+	// Validate the token, if user has Login priielege then proceed.
+	//Else send 401 Unauthorised
 	var oemprivileges []string
 	privileges := []string{common.PrivilegeLogin}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -80,12 +80,10 @@ func (a *Aggregator) GetAggregationService(ctx context.Context, req *aggregatorp
 		OdataID:      "/redfish/v1/AggregationService",
 		Actions: agresponse.Actions{
 			Reset: agresponse.Action{
-				Target:     "/redfish/v1/AggregationService/Actions/AggregationService.Reset/",
-				ActionInfo: "/redfish/v1/AggregationService/ResetActionInfo",
+				Target: "/redfish/v1/AggregationService/Actions/AggregationService.Reset/",
 			},
 			SetDefaultBootOrder: agresponse.Action{
-				Target:     "/redfish/v1/AggregationService/Actions/AggregationService.SetDefaultBootOrder/",
-				ActionInfo: "/redfish/v1/AggregationService/SetDefaultBootOrderActionInfo",
+				Target: "/redfish/v1/AggregationService/Actions/AggregationService.SetDefaultBootOrder/",
 			},
 		},
 		Aggregates: agresponse.OdataID{
@@ -137,24 +135,24 @@ func (a *Aggregator) Reset(ctx context.Context, req *aggregatorproto.AggregatorR
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 
 	// Task Service using RPC and get the taskID
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create task: " + err.Error()
+		errMsg := "Unable to create task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	taskID := strings.TrimPrefix(taskURI, "/redfish/v1/TaskService/Tasks/")
@@ -212,22 +210,22 @@ func (a *Aggregator) SetDefaultBootOrder(ctx context.Context, req *aggregatorpro
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create task: " + err.Error()
+		errMsg := "Unable to create task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	strArray := strings.Split(taskURI, "/")
@@ -247,7 +245,7 @@ func (a *Aggregator) SetDefaultBootOrder(ctx context.Context, req *aggregatorpro
 	})
 	if err != nil {
 		// print error as we are unable to communicate with svc-task and then return
-		log.Printf("error while contacting task-service with UpdateTask RPC : %v", err)
+		log.Error("Unable to contact task-service with UpdateTask RPC : " + err.Error())
 	}
 	go a.connector.SetDefaultBootOrder(taskID, sessionUserName, req)
 	// return 202 Accepted
@@ -291,15 +289,15 @@ func (a *Aggregator) AddAggregationSource(ctx context.Context, req *aggregatorpr
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 
@@ -307,34 +305,34 @@ func (a *Aggregator) AddAggregationSource(ctx context.Context, req *aggregatorpr
 	var addRequest system.AggregationSource
 	err = json.Unmarshal(req.RequestBody, &addRequest)
 	if err != nil {
-		errMsg := "unable to parse the add request" + err.Error()
+		errMsg := "Unable to parse the add request" + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 
 	//validating the AggregationSourceRequest
 	invalidParam := validateAggregationSourceRequest(addRequest)
 	if invalidParam != "" {
-		errMsg := "error: Mandatory field " + invalidParam + " Missing"
+		errMsg := "Mandatory field " + invalidParam + " Missing"
 		generateResponse(common.GeneralError(http.StatusBadRequest, response.PropertyMissing, errMsg, []interface{}{invalidParam}, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	managerAddress := addRequest.HostName
 	err = validateManagerAddress(managerAddress)
 	if err != nil {
 		generateResponse(common.GeneralError(http.StatusBadRequest, response.PropertyValueFormatError, err.Error(), []interface{}{managerAddress, "ManagerAddress"}, nil), resp)
-		log.Printf(err.Error())
+		log.Error(err.Error())
 		return nil
 	}
 
 	// Task Service using RPC and get the taskID
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create the task: " + err.Error()
+		errMsg := "Unable to create the task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	strArray := strings.Split(taskURI, "/")
@@ -399,7 +397,7 @@ func (a *Aggregator) GetAllAggregationSource(ctx context.Context, req *aggregato
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -422,7 +420,7 @@ func (a *Aggregator) GetAggregationSource(ctx context.Context, req *aggregatorpr
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -445,7 +443,7 @@ func (a *Aggregator) UpdateAggregationSource(ctx context.Context, req *aggregato
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -470,24 +468,24 @@ func (a *Aggregator) DeleteAggregationSource(ctx context.Context, req *aggregato
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 
 	// Task Service using RPC and get the taskID
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create the task: " + err.Error()
+		errMsg := "Unable to create task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	var taskID string
@@ -569,7 +567,7 @@ func (a *Aggregator) CreateAggregate(ctx context.Context, req *aggregatorproto.A
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -589,7 +587,7 @@ func (a *Aggregator) GetAllAggregates(ctx context.Context, req *aggregatorproto.
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -609,7 +607,7 @@ func (a *Aggregator) GetAggregate(ctx context.Context, req *aggregatorproto.Aggr
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -629,7 +627,7 @@ func (a *Aggregator) DeleteAggregate(ctx context.Context, req *aggregatorproto.A
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -649,7 +647,7 @@ func (a *Aggregator) AddElementsToAggregate(ctx context.Context, req *aggregator
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -669,7 +667,7 @@ func (a *Aggregator) RemoveElementsFromAggregate(ctx context.Context, req *aggre
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -692,24 +690,24 @@ func (a *Aggregator) ResetElementsOfAggregate(ctx context.Context, req *aggregat
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 
 	// Task Service using RPC and get the taskID
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create task: " + err.Error()
+		errMsg := "Unable to create task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	taskID := strings.TrimPrefix(taskURI, "/redfish/v1/TaskService/Tasks/")
@@ -767,22 +765,22 @@ func (a *Aggregator) SetDefaultBootOrderElementsOfAggregate(ctx context.Context,
 	privileges := []string{common.PrivilegeConfigureComponents}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
 	sessionUserName, err := a.connector.GetSessionUserName(req.SessionToken)
 	if err != nil {
-		errMsg := "error while trying to get the session username: " + err.Error()
+		errMsg := "Unable to get session username: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusUnauthorized, response.NoValidSession, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	taskURI, err := a.connector.CreateTask(sessionUserName)
 	if err != nil {
-		errMsg := "error while trying to create task: " + err.Error()
+		errMsg := "Unable to create task: " + err.Error()
 		generateResponse(common.GeneralError(http.StatusInternalServerError, response.InternalError, errMsg, nil, nil), resp)
-		log.Printf(errMsg)
+		log.Error(errMsg)
 		return nil
 	}
 	strArray := strings.Split(taskURI, "/")
@@ -802,7 +800,7 @@ func (a *Aggregator) SetDefaultBootOrderElementsOfAggregate(ctx context.Context,
 	})
 	if err != nil {
 		// print error as we are unable to communicate with svc-task and then return
-		log.Printf("error while contacting task-service with UpdateTask RPC : %v", err)
+		log.Error("Unable to contact task-service with UpdateTask RPC : " + err.Error())
 	}
 	go a.connector.SetDefaultBootOrderElementsOfAggregate(taskID, sessionUserName, req)
 	// return 202 Accepted
@@ -831,7 +829,7 @@ func (a *Aggregator) GetAllConnectionMethods(ctx context.Context, req *aggregato
 	privileges := []string{common.PrivilegeLogin}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}
@@ -851,7 +849,7 @@ func (a *Aggregator) GetConnectionMethod(ctx context.Context, req *aggregatorpro
 	privileges := []string{common.PrivilegeLogin}
 	authResp := a.connector.Auth(req.SessionToken, privileges, oemprivileges)
 	if authResp.StatusCode != http.StatusOK {
-		log.Printf("error while trying to authenticate session")
+		log.Error("Unable to authenticate session with token: " + req.SessionToken)
 		generateResponse(authResp, resp)
 		return nil
 	}

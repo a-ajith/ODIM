@@ -18,8 +18,8 @@ package agmodel
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	dmtfmodel "github.com/ODIM-Project/ODIM/lib-dmtf/model"
@@ -123,12 +123,14 @@ func (system *SaveSystem) Create(systemID string) *errors.Error {
 
 	conn, err := common.GetDBConnection(common.OnDisk)
 	if err != nil {
+		log.Error("error while trying to get Db connection : " + err.Error())
 		return err
 	}
 	//Create a header for data entry
 	const table string = "System"
 	//Save data into Database
 	if err = conn.Create(table, systemID, system); err != nil {
+		log.Error("error while trying to save system data in DB : " + err.Error())
 		return err
 	}
 	return nil
@@ -167,6 +169,7 @@ func GetComputeSystem(deviceUUID string) (dmtfmodel.ComputerSystem, error) {
 
 	conn, err := common.GetDBConnection(common.InMemory)
 	if err != nil {
+		log.Error("GetComputeSystem : error while trying to get db conenction : " + err.Error())
 		return compute, err
 	}
 
@@ -176,6 +179,7 @@ func GetComputeSystem(deviceUUID string) (dmtfmodel.ComputerSystem, error) {
 	}
 
 	if err := json.Unmarshal([]byte(computeData), &compute); err != nil {
+		log.Error("GetComputeSystem : error while Unmarshaling data : " + err.Error())
 		return compute, err
 	}
 	return compute, nil
@@ -185,9 +189,10 @@ func GetComputeSystem(deviceUUID string) (dmtfmodel.ComputerSystem, error) {
 //SaveComputeSystem will save the compute server complete details into the database
 func SaveComputeSystem(computeServer dmtfmodel.ComputerSystem, deviceUUID string) error {
 	//use dmtf logic to save data into database
-	log.Println("Saving server details into database")
+	log.Info("Saving server details into database")
 	err := computeServer.SaveInMemory(deviceUUID)
 	if err != nil {
+		log.Error("error while trying to save server details in DB : " + err.Error())
 		return err
 	}
 	return nil
@@ -196,9 +201,10 @@ func SaveComputeSystem(computeServer dmtfmodel.ComputerSystem, deviceUUID string
 //SaveChassis will save the chassis details into the database
 func SaveChassis(chassis dmtfmodel.Chassis, deviceUUID string) error {
 	//use dmtf logic to save data into database
-	log.Println("Saving server details into database")
+	log.Info("Saving chassis details into database")
 	err := chassis.SaveInMemory(deviceUUID)
 	if err != nil {
+		log.Error("error while trying to save chassis details in DB : " + err.Error())
 		return err
 	}
 	return nil
@@ -209,9 +215,11 @@ func GenericSave(body []byte, table string, key string) error {
 
 	connPool, err := common.GetDBConnection(common.InMemory)
 	if err != nil {
+		log.Error("GenericSave : error while trying to get DB Connection : " + err.Error())
 		return fmt.Errorf("error while trying to connecting to DB: %v", err.Error())
 	}
 	if err = connPool.AddResourceData(table, key, string(body)); err != nil {
+		log.Error("GenericSave : error while trying to add resource date to DB: " + err.Error())
 		return fmt.Errorf("error while trying to create new %v resource: %v", table, err.Error())
 	}
 	return nil
@@ -228,7 +236,7 @@ func SaveRegistryFile(body []byte, table string, key string) error {
 		if errors.DBKeyAlreadyExist != err.ErrNo() {
 			return fmt.Errorf("error while trying to create new %v resource: %v", table, err.Error())
 		}
-		log.Printf("warning: skipped saving of duplicate data with key %v", key)
+		log.Warn("Skipped saving of duplicate data with key " + key)
 		return nil
 	}
 	return nil
@@ -278,6 +286,14 @@ func DeleteComputeSystem(index int, key string) *errors.Error {
 				return errors.PackError(err.ErrNo(), "error while trying to delete compute details: ", err.Error())
 			}
 		}
+		if inventoryData, err = connPool.GetAllMatchingDetails("SoftwareInventory", systemID); err != nil {
+			return errors.PackError(err.ErrNo(), "error while trying to get compute details: ", err.Error())
+		}
+		for _, value := range inventoryData {
+			if err = connPool.Delete("SoftwareInventory", value); err != nil {
+				return errors.PackError(err.ErrNo(), "error while trying to delete compute details: ", err.Error())
+			}
+		}
 	}
 
 	//Delete All resources
@@ -316,6 +332,7 @@ func deletefilteredkeys(key string) error {
 			}
 		}
 	}
+
 	delErr := conn.Del("UUID", key)
 	if delErr != nil {
 		if delErr.Error() != "no data with ID found" {
@@ -377,7 +394,7 @@ func SaveIndex(searchForm map[string]interface{}, table, uuid string) error {
 	if err != nil {
 		return fmt.Errorf("error while trying to connecting to DB: %v", err)
 	}
-	log.Println("Creating index")
+	log.Info("Creating index")
 	searchForm["UUID"] = uuid
 	if err := conn.CreateIndex(searchForm, table); err != nil {
 		return fmt.Errorf("error while trying to index the document: %v", err)
@@ -946,5 +963,19 @@ func DeleteActiveRequest(key string) *errors.Error {
 	if err != nil {
 		return errors.PackError(err.ErrNo(), "error: while trying to delete active connection details: ", err.Error())
 	}
+	return nil
+}
+
+//SavePluginManagerInfo will save plugin manager  data into the database
+func SavePluginManagerInfo(body []byte, table string, key string) error {
+
+	conn, err := common.GetDBConnection(common.InMemory)
+	if err != nil {
+		return fmt.Errorf("Unable to save the plugin data with SavePluginManagerInfo: %v", err.Error())
+	}
+	if err := conn.Create(table, key, string(body)); err != nil {
+		return errors.PackError(err.ErrNo(), "Unable to save the plugin data with SavePluginManagerInfo:  duplicate UUID: ", err.Error())
+	}
+
 	return nil
 }
