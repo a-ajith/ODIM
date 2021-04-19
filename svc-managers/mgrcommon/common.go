@@ -17,9 +17,10 @@ package mgrcommon
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -64,6 +65,11 @@ type PluginToken struct {
 
 // Token variable hold the all the XAuthToken  against the plguin ID
 var Token PluginToken
+
+// DBInterface hold interface for db functions
+type DBInterface struct {
+	AddManagertoDBInterface func(mgrmodel.RAManager) error
+}
 
 // StoreToken to store the token ioto the  map
 func (p *PluginToken) StoreToken(plguinID, token string) {
@@ -157,7 +163,7 @@ func ContactPlugin(req PluginContactRequest, errorMessage string) ([]byte, strin
 			errorMessage = errorMessage + err.Error()
 			resp.StatusCode = http.StatusInternalServerError
 			resp.StatusMessage = errors.InternalError
-			log.Println(errorMessage)
+			log.Error(errorMessage)
 			return nil, "", resp, fmt.Errorf(errorMessage)
 		}
 	}
@@ -167,13 +173,13 @@ func ContactPlugin(req PluginContactRequest, errorMessage string) ([]byte, strin
 		errorMessage := "error while trying to read response body: " + err.Error()
 		resp.StatusCode = http.StatusInternalServerError
 		resp.StatusMessage = errors.InternalError
-		log.Println(errorMessage)
+		log.Error(errorMessage)
 		return nil, "", resp, fmt.Errorf(errorMessage)
 	}
 
 	if !(response.StatusCode == http.StatusOK || response.StatusCode == http.StatusCreated) {
 		resp.StatusCode = int32(response.StatusCode)
-		log.Println(errorMessage)
+		log.Error(errorMessage)
 		return body, "", resp, fmt.Errorf(errorMessage)
 	}
 	data := string(body)
@@ -203,10 +209,10 @@ func getPluginStatus(plugin mgrmodel.Plugin) bool {
 	}
 	status, _, _, err := pluginStatus.CheckStatus()
 	if err != nil && !status {
-		log.Println("Error While getting the status for plugin ", plugin.ID, err)
+		log.Error("Error While getting the status for plugin " + plugin.ID + err.Error())
 		return status
 	}
-	log.Println("Status of plugin", plugin.ID, status)
+	log.Error("Status of plugin" + plugin.ID + strconv.FormatBool(status))
 	return status
 }
 
@@ -244,7 +250,7 @@ func createToken(req PluginContactRequest) string {
 	contactRequest.OID = "/ODIM/v1/Sessions"
 	_, token, _, err := ContactPlugin(contactRequest, "error while logging in to plugin: ")
 	if err != nil {
-		log.Println(err)
+		log.Error(err.Error())
 	}
 	if token != "" {
 		Token.StoreToken(req.Plugin.ID, token)
@@ -269,4 +275,27 @@ func RetryManagersOperation(req PluginContactRequest, errorMessage string) ([]by
 	req.Token = token
 	return ContactPlugin(req, errorMessage)
 
+}
+
+// TrackConfigFileChanges monitors the odim config changes using fsnotfiy
+func TrackConfigFileChanges(configFilePath string, dbInterface DBInterface) {
+	eventChan := make(chan interface{})
+	go common.TrackConfigFileChanges(configFilePath, eventChan)
+	select {
+	case <-eventChan: // new data arrives through eventChan channel
+		config.TLSConfMutex.RLock()
+		mgr := mgrmodel.RAManager{
+			Name:            "odimra",
+			ManagerType:     "Service",
+			FirmwareVersion: config.Data.FirmwareVersion,
+			ID:              config.Data.RootServiceUUID,
+			UUID:            config.Data.RootServiceUUID,
+			State:           "Enabled",
+		}
+		config.TLSConfMutex.RUnlock()
+		err := dbInterface.AddManagertoDBInterface(mgr)
+		if err != nil {
+			log.Error(err)
+		}
+	}
 }

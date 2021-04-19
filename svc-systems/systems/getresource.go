@@ -20,7 +20,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 
 	"regexp"
@@ -40,21 +40,11 @@ import (
 	"github.com/ODIM-Project/ODIM/svc-systems/sresponse"
 )
 
-// Schema is used to define the allowed values for search/filter
-type Schema struct {
-	SearchKeys    []map[string]map[string]string `json:"searchKeys"`
-	ConditionKeys []string                       `json:"conditionKeys"`
-	QueryKeys     []string                       `json:"queryKeys"`
-}
-
-// SF holds the schema data for search/filter
-var SF Schema
-
 func setRegexFlag(val string) bool {
 	var re = regexp.MustCompile(`(?m)[\[\]!@#$%^&*(),.?":{}|<>]`)
 
 	for i, match := range re.FindAllString(val, -1) {
-		log.Println(match, " found at ", i)
+		log.Info("Matched entry no.: " + string(i) + " match=" + match)
 		return true
 	}
 	return false
@@ -74,7 +64,7 @@ func ifMatches(strPara string, operator string, resp response.RPC) (response.RPC
 
 		resp, err := errorResp(e, resp)
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(err.Error())
 			return resp, err
 		}
 	}
@@ -85,14 +75,14 @@ func validate(strPara string, resp response.RPC) (response.RPC, error) {
 	if strings.Contains(strPara, "and") {
 		resp, err := ifMatches(strPara, "and", resp)
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(err.Error())
 			return resp, err
 		}
 	}
 	if strings.Contains(strPara, "or") {
 		resp, err := ifMatches(strPara, "or", resp)
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(err.Error())
 			return resp, err
 		}
 	}
@@ -131,18 +121,18 @@ func GetMembers(allowed map[string]map[string]bool, expression []string, resp re
 
 	allowed["searchKeys"] = make(map[string]bool)
 	allowed["conditionKeys"] = make(map[string]bool)
-	for _, value := range SF.SearchKeys {
+	for _, value := range scommon.SF.SearchKeys {
 		for k := range value {
 			allowed["searchKeys"][k] = true
 		}
 	}
-	for _, value := range SF.ConditionKeys {
+	for _, value := range scommon.SF.ConditionKeys {
 		allowed["conditionKeys"][value] = true
 	}
 	var members []dmtf.Link
 	var regexFlag, typeFlag, arrayFlag bool
 	for amp, pam := range expression {
-		for _, value := range SF.SearchKeys {
+		for _, value := range scommon.SF.SearchKeys {
 			for k, v := range value {
 				if k == pam {
 					if v["type"] != "string" && v["type"] != "[]string" {
@@ -253,7 +243,7 @@ func getAllSystemIDs(resp response.RPC) ([]dmtf.Link, response.RPC, error) {
 	var mems []dmtf.Link
 	systemKeys, err := smodel.GetAllKeysFromTable("ComputerSystem")
 	if err != nil {
-		log.Printf("error getting all keys of systemcollection table : %v", err)
+		log.Error("error getting all keys of systemcollection table : " + err.Error())
 		errorMessage := err.Error()
 		if errorMessage == "error while trying to get resource details: no data with the with table name SystemCollection found" {
 			return nil, common.GeneralError(http.StatusNotFound, response.ResourceNotFound, errorMessage, []interface{}{"ComputerSystem", ""}, nil), err
@@ -312,7 +302,7 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 	allowed["queryKeys"] = make(map[string]bool)
 	allowed["logicalOperators"] = make(map[string]bool)
 
-	for _, value := range SF.QueryKeys {
+	for _, value := range scommon.SF.QueryKeys {
 		value = "$" + value
 		allowed["queryKeys"][value] = true
 	}
@@ -344,7 +334,7 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 	var respMembers []dmtf.Link
 	var err error
 
-	if strings.Contains(strPara, "(") || strings.Contains(strPara, ")") {
+	if checkParentheses(strPara) {
 		if strings.Count(strPara, "(") != strings.Count(strPara, ")") {
 			errorMessage := " not a valid search/filter expression"
 			return common.GeneralError(http.StatusBadRequest, response.QueryCombinationInvalid, errorMessage, []interface{}{"ComputerSystem", ""}, nil), fmt.Errorf(errorMessage)
@@ -422,14 +412,14 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 			var inter [][]dmtf.Link
 			resp, err = validate(strPara, resp)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(err.Error())
 				return resp, err
 			}
 			if strings.Contains(strPara, " and ") {
 				for _, e := range strings.Split(strPara, " and ") {
 					resp, err = errorResp(e, resp)
 					if err != nil {
-						log.Println(err.Error())
+						log.Error(err.Error())
 						return resp, err
 					}
 					_ = json.Unmarshal([]byte(e), &ww)
@@ -441,7 +431,7 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 				for _, e := range strings.Split(strPara, " or ") {
 					resp, err = errorResp(e, resp)
 					if err != nil {
-						log.Println(err.Error())
+						log.Error(err.Error())
 						return resp, err
 					}
 					_ = json.Unmarshal([]byte(e), &ww)
@@ -468,14 +458,14 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 		var inter [][]dmtf.Link
 		resp, err = validate(strPara, resp)
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(err.Error())
 			return resp, err
 		}
 		if strings.Contains(strPara, " and ") {
 			for _, each := range strings.Split(strPara, " and ") {
 				resp, err = errorResp(each, resp)
 				if err != nil {
-					log.Println(err.Error())
+					log.Error(err.Error())
 					return resp, err
 				}
 				ww, resp, err = GetMembers(allowed, strings.Split(each, " "), resp)
@@ -490,7 +480,7 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 			for _, each := range strings.Split(strPara, " or ") {
 				resp, err = errorResp(each, resp)
 				if err != nil {
-					log.Println(err.Error())
+					log.Error(err.Error())
 					return resp, err
 				}
 				ww, resp, err = GetMembers(allowed, strings.Split(each, " "), resp)
@@ -529,7 +519,7 @@ func SearchAndFilter(paramStr []string, resp response.RPC) (response.RPC, error)
 	}
 	systemCollection := sresponse.Collection{
 		OdataContext: "/redfish/v1/$metadata#ComputerSystemCollection.ComputerSystemCollection",
-		OdataID:      "/redfish/v1/Systems/",
+		OdataID:      "/redfish/v1/Systems",
 		OdataType:    "#ComputerSystemCollection.ComputerSystemCollection",
 		Description:  "Computer Systems view",
 		Name:         "Computer Systems",
@@ -588,7 +578,7 @@ func (p *PluginContact) GetSystemResource(req *systemsproto.GetSystemsRequest) r
 
 	data, err := smodel.GetResource(tableName, req.URL)
 	if err != nil {
-		log.Printf("error getting system details : %v", err.Error())
+		log.Error("error getting system details : " + err.Error())
 		errorMessage := err.Error()
 		if errors.DBKeyNotFound == err.ErrNo() {
 			var getDeviceInfoRequest = scommon.ResourceInfoRequest{
@@ -631,10 +621,10 @@ func rediscoverStorageInventory(systemID, systemURL string) {
 		SystemURL: systemURL,
 	})
 	if err != nil {
-		log.Println("Error while rediscoverStorageInventroy")
+		log.Error("Error while rediscoverStorageInventroy")
 		return
 	}
-	log.Println("info: rediscovery of system storage started.")
+	log.Info("rediscovery of system storage started.")
 	return
 }
 
@@ -645,15 +635,15 @@ func GetSystemsCollection(req *systemsproto.GetSystemsRequest) response.RPC {
 	allowed["searchKeys"] = make(map[string]bool)
 	allowed["conditionKeys"] = make(map[string]bool)
 	allowed["queryKeys"] = make(map[string]bool)
-	for _, value := range SF.SearchKeys {
+	for _, value := range scommon.SF.SearchKeys {
 		for k := range value {
 			allowed["searchKeys"][k] = true
 		}
 	}
-	for _, value := range SF.ConditionKeys {
+	for _, value := range scommon.SF.ConditionKeys {
 		allowed["conditionKeys"][value] = true
 	}
-	for _, value := range SF.QueryKeys {
+	for _, value := range scommon.SF.QueryKeys {
 		allowed["queryKeys"][value] = true
 	}
 	var resp response.RPC
@@ -675,7 +665,7 @@ func GetSystemsCollection(req *systemsproto.GetSystemsRequest) response.RPC {
 	}
 	systemKeys, err := smodel.GetAllKeysFromTable("ComputerSystem")
 	if err != nil {
-		log.Printf("error getting all keys of systemcollection table : %v", err)
+		log.Error("error getting all keys of systemcollection table : " + err.Error())
 		errorMessage := err.Error()
 		if errorMessage == "error while trying to get resource details: no data with the with table name SystemCollection found" {
 			return common.GeneralError(http.StatusNotFound, response.ResourceNotFound, errorMessage, []interface{}{"ComputerSystem", ""}, nil)
@@ -684,7 +674,7 @@ func GetSystemsCollection(req *systemsproto.GetSystemsRequest) response.RPC {
 	}
 	systemCollection := sresponse.Collection{
 		OdataContext: "/redfish/v1/$metadata#ComputerSystemCollection.ComputerSystemCollection",
-		OdataID:      "/redfish/v1/Systems/",
+		OdataID:      "/redfish/v1/Systems",
 		OdataType:    "#ComputerSystemCollection.ComputerSystemCollection",
 		Description:  "Computer Systems view",
 		Name:         "Computer Systems",
@@ -748,7 +738,7 @@ func (p *PluginContact) GetSystems(req *systemsproto.GetSystemsRequest) response
 	} else {
 		data, err = smodel.GetSystemByUUID(req.URL)
 		if err != nil {
-			log.Printf("error getting system details : %v", err.Error())
+			log.Error("error getting system details : " + err.Error())
 			errorMessage := err.Error()
 			if errors.DBKeyNotFound == err.ErrNo() {
 				return common.GeneralError(http.StatusNotFound, response.ResourceNotFound, errorMessage, []interface{}{"ComputerSystem", req.RequestParam}, nil)
@@ -834,13 +824,15 @@ func getRangeData(key, expr string, match int, regexFlag bool) ([]string, error)
 }
 
 func parseRegexData(data []string, regex string) ([]string, error) {
+	regex = strings.Replace(regex, "(", "\\(", -1)
+	regex = strings.Replace(regex, ")", "\\)", -1)
 	regex = "(?i)" + regex
 	var list = make([]string, 0)
 	for i := 0; i < len(data); i++ {
 		values := strings.Split(data[i], "::")
 		found, err := regexp.MatchString(regex, values[0])
 		if err != nil {
-			log.Println("regular expression error: ", err)
+			log.Error("regular expression error: " + err.Error())
 			return list, err
 		}
 		if found {
@@ -849,4 +841,16 @@ func parseRegexData(data []string, regex string) ([]string, error) {
 
 	}
 	return list, nil
+}
+
+// this function checks query has open bracket["("] as prefix to ignore the brackets inside the string
+// for e.g if query is ProcessorSummary/Model eq Intel(R) Xeon(R) Gold 6152 CPU @ 2.10GHz
+// here Inter(R) has bracket inbetween the string, so ignore this string for the first if search criteria
+func checkParentheses(strPara string) bool {
+	for _, val := range strings.Split(strPara, " ") {
+		if strings.HasPrefix(val, "(") {
+			return true
+		}
+	}
+	return false
 }

@@ -37,6 +37,7 @@ type Manager struct {
 	FirmwareVersion    string            `json:"FirmwareVersion"`
 	Status             *Status           `json:"Status,omitempty"`
 	HostInterfaces     *OdataID          `json:"HostInterfaces,omitempty"`
+	SerialInterface    *OdataID          `json:"SerialInterface,omitempty"`
 	EthernetInterfaces *OdataID          `json:"EthernetInterfaces,omitempty"`
 	LogServices        *OdataID          `json:"LogServices,omitempty"`
 	NetworkProtocol    *OdataID          `json:"NetworkProtocol,omitempty"`
@@ -179,7 +180,7 @@ func GenericSave(body []byte, table string, key string) error {
 }
 
 // AddManagertoDB will add odimra Manager details to DB
-func (mgr *RAManager) AddManagertoDB() error {
+func AddManagertoDB(mgr RAManager) error {
 	key := "/redfish/v1/Managers/" + mgr.UUID
 	data, err := json.Marshal(mgr)
 	if err != nil {

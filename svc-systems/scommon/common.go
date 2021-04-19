@@ -18,8 +18,8 @@ package scommon
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,6 +29,16 @@ import (
 	"github.com/ODIM-Project/ODIM/lib-utilities/errors"
 	"github.com/ODIM-Project/ODIM/svc-systems/smodel"
 )
+
+// Schema is used to define the allowed values for search/filter
+type Schema struct {
+	SearchKeys    []map[string]map[string]string `json:"searchKeys"`
+	ConditionKeys []string                       `json:"conditionKeys"`
+	QueryKeys     []string                       `json:"queryKeys"`
+}
+
+// SF holds the schema data for search/filter
+var SF Schema
 
 //PluginContactRequest  hold the request of contact plugin
 type PluginContactRequest struct {
@@ -203,7 +213,7 @@ func ContactPlugin(req PluginContactRequest, errorMessage string) ([]byte, strin
 			errorMessage = errorMessage + err.Error()
 			resp.StatusCode = http.StatusInternalServerError
 			resp.StatusMessage = errors.InternalError
-			log.Println(errorMessage)
+			log.Error(errorMessage)
 			return nil, "", resp, fmt.Errorf(errorMessage)
 		}
 	}
@@ -213,11 +223,11 @@ func ContactPlugin(req PluginContactRequest, errorMessage string) ([]byte, strin
 		errorMessage := "error while trying to read response body: " + err.Error()
 		resp.StatusCode = http.StatusInternalServerError
 		resp.StatusMessage = errors.InternalError
-		log.Println(errorMessage)
+		log.Error(errorMessage)
 		return nil, "", resp, fmt.Errorf(errorMessage)
 	}
-	log.Println("Response", string(body))
-	log.Println("response.StatusCode", response.StatusCode)
+	log.Info("Response" + string(body))
+	log.Info("response.StatusCode" + string(response.StatusCode))
 	if response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusOK {
 		resp.StatusCode = int32(response.StatusCode)
 		log.Println(errorMessage)
@@ -261,10 +271,10 @@ func GetPluginStatus(plugin smodel.Plugin) bool {
 	}
 	status, _, _, err := pluginStatus.CheckStatus()
 	if err != nil && !status {
-		log.Println("Error While getting the status for plugin ", plugin.ID, err)
+		log.Error("Error While getting the status for plugin " + plugin.ID + ": " + err.Error())
 		return status
 	}
-	log.Println("Status of plugin", plugin.ID, status)
+	log.Info("Status of plugin" + plugin.ID + strconv.FormatBool(status))
 	return status
 }
 
@@ -278,4 +288,23 @@ func callPlugin(req PluginContactRequest) (*http.Response, error) {
 		return req.ContactClient(reqURL, req.HTTPMethodType, "", oid, req.DeviceInfo, req.BasicAuth)
 	}
 	return req.ContactClient(reqURL, req.HTTPMethodType, req.Token, oid, req.DeviceInfo, nil)
+}
+
+// TrackConfigFileChanges monitors the odim config changes using fsnotfiy
+func TrackConfigFileChanges(configFilePath string) {
+	eventChan := make(chan interface{})
+	go common.TrackConfigFileChanges(configFilePath, eventChan)
+	select {
+	case <-eventChan: // new data arrives through eventChan channel
+		config.TLSConfMutex.RLock()
+		schemaFile, err := ioutil.ReadFile(config.Data.SearchAndFilterSchemaPath)
+		if err != nil {
+			log.Error("error while trying to read search/filter schema json" + err.Error())
+		}
+		config.TLSConfMutex.RUnlock()
+		err = json.Unmarshal(schemaFile, &SF)
+		if err != nil {
+			log.Error("error while trying to fetch search/filter schema json" + err.Error())
+		}
+	}
 }

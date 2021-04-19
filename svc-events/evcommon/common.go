@@ -17,9 +17,12 @@ package evcommon
 
 import (
 	"encoding/json"
+	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
+	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -50,7 +53,7 @@ type StartUpInteraface struct {
 // EmbTopic hold the list all consuming topics after
 type EmbTopic struct {
 	TopicsList map[string]bool
-	lock       sync.Mutex
+	lock       sync.RWMutex
 	EMBConsume func(string)
 }
 
@@ -106,8 +109,8 @@ func (p *PluginToken) GetToken(pluginID string) string {
 
 // ConsumeTopic check the existing topic list if it is not present then it will add topic name to list and consume that topic
 func (e *EmbTopic) ConsumeTopic(topicName string) {
-	e.lock.Lock()
-	defer e.lock.Unlock()
+	e.lock.RLock()
+	defer e.lock.RUnlock()
 	if ok := e.TopicsList[topicName]; !ok {
 		go consumer.Consume(topicName)
 		e.TopicsList[topicName] = true
@@ -126,19 +129,24 @@ func (st *StartUpInteraface) GetAllPluginStatus() {
 	for {
 		pluginList, err := evmodel.GetAllPlugins()
 		if err != nil {
-			log.Println(err)
+			log.Error(err.Error())
 			return
 		}
 		for i := 0; i < len(pluginList); i++ {
 			go st.getPluginStatus(pluginList[i])
 		}
-		time.Sleep(time.Minute * time.Duration(config.Data.PluginStatusPolling.PollingFrequencyInMins))
+		var pollingTime int
+		config.TLSConfMutex.RLock()
+		pollingTime = config.Data.PluginStatusPolling.PollingFrequencyInMins
+		config.TLSConfMutex.RUnlock()
+		time.Sleep(time.Minute * time.Duration(pollingTime))
 	}
 
 }
 func (st *StartUpInteraface) getPluginStatus(plugin evmodel.Plugin) {
 	PluginsMap := make(map[string]bool)
 	StartUpResourceBatchSize := config.Data.PluginStatusPolling.StartUpResouceBatchSize
+	config.TLSConfMutex.RLock()
 	var pluginStatus = common.PluginStatus{
 		Method: http.MethodGet,
 		RequestBody: common.StatusRequest{
@@ -154,34 +162,36 @@ func (st *StartUpInteraface) getPluginStatus(plugin evmodel.Plugin) {
 		PluginPrefferedAuthType: plugin.PreferredAuthType,
 		CACertificate:           &config.Data.KeyCertConf.RootCACertificate,
 	}
+	config.TLSConfMutex.RUnlock()
 	status, _, topicsList, err := pluginStatus.CheckStatus()
 	if err != nil && !status {
 		PluginStartUp = false
-		log.Println("Error While getting the status for plugin ", plugin.ID, err)
+		log.Error("Error While getting the status for plugin " + plugin.ID + err.Error())
 		return
 	}
-	log.Println("Status of plugin", plugin.ID, status)
+	log.Info("Status of plugin " + plugin.ID + " is " + strconv.FormatBool(status))
 	PluginsMap[plugin.ID] = status
 	var allServers []SavedSystems
 	for pluginID, status := range PluginsMap {
 		if status && !PluginStartUp {
 			allServers, err = st.getAllServers(pluginID)
 			if err != nil {
-				log.Println("Error While getting the servers", pluginID, err)
+				log.Error("Error While getting the servers" + pluginID + err.Error())
 				continue
 			}
 			for {
 				if len(allServers) < StartUpResourceBatchSize {
 					err = callPluginStartUp(allServers, pluginID)
 					if err != nil {
-						log.Println("Error While trying call plugin startup", pluginID, err)
+						log.Error("Error While trying call plugin startup" +
+							pluginID + err.Error())
 					}
 					break
 				}
 				batchServers := allServers[:StartUpResourceBatchSize]
 				err = callPluginStartUp(batchServers, pluginID)
 				if err != nil {
-					log.Println("Error While trying call plugin startup", pluginID, err)
+					log.Error("Error While trying call plugin startup" + pluginID + err.Error())
 					continue
 				}
 				allServers = allServers[StartUpResourceBatchSize:]
@@ -190,7 +200,9 @@ func (st *StartUpInteraface) getPluginStatus(plugin evmodel.Plugin) {
 		}
 	}
 	// Adding the topics to the list
+	EMBTopics.lock.Lock()
 	EMBTopics.EMBConsume = st.EMBConsume
+	EMBTopics.lock.Unlock()
 	for j := 0; j < len(topicsList); j++ {
 		EMBTopics.ConsumeTopic(topicsList[j])
 	}
@@ -216,7 +228,7 @@ func (st *StartUpInteraface) getAllServers(pluginID string) ([]SavedSystems, err
 			if err != nil {
 				// Frame the RPC response body and response Header below
 				errorMessage := "error while trying to decrypt device password for the host: " + s.ManagerAddress + ":" + err.Error()
-				log.Printf(errorMessage)
+				log.Error(errorMessage)
 				continue
 			}
 			s.Password = decryptedPasswordByte
@@ -245,10 +257,10 @@ func GetPluginStatus(plugin *evmodel.Plugin) bool {
 	}
 	status, _, _, err := pluginStatus.CheckStatus()
 	if err != nil && !status {
-		log.Println("Error While getting the status for plugin ", plugin.ID, err)
+		log.Error("Error While getting the status for plugin " + plugin.ID + err.Error())
 		return status
 	}
-	log.Println("Status of plugin", plugin.ID, status)
+	log.Info("Status of plugin" + plugin.ID + strconv.FormatBool(status))
 	return status
 }
 
@@ -263,7 +275,8 @@ func callPluginStartUp(servers []SavedSystems, pluginID string) error {
 		var err error
 		s.Location, s.EventTypes, err = getSubscribedEventsDetails(server.ManagerAddress)
 		if err != nil {
-			log.Println("Error while retrieving the Subsction details from DB for device: ", server.ManagerAddress, err)
+			log.Error("Error while retrieving the Subsction details from DB for device: " +
+				server.ManagerAddress + err.Error())
 			continue
 		}
 		s.Device = server
@@ -303,7 +316,7 @@ func callPluginStartUp(servers []SavedSystems, pluginID string) error {
 	//return updateDeviceSubscriptionLocation(startUpMap[0].Device.ManagerAddress, response.Header.Get("location"))
 	bodyBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Println(err)
+		log.Error(err.Error())
 		return err
 	}
 	var r map[string]string
@@ -327,12 +340,20 @@ func getSubscribedEventsDetails(serverAddress string) (string, []string, error) 
 	var location string
 	var eventTypes []string
 	var emptyListFlag bool
-	deviceSubscription, err := evmodel.GetDeviceSubscriptions(serverAddress)
+
+	deviceIPAddress, errorMessage := GetIPFromHostName(serverAddress)
+	if errorMessage != "" {
+		return "", nil, fmt.Errorf(errorMessage)
+	}
+	searchKey := GetSearchKey(deviceIPAddress, evmodel.DeviceSubscriptionIndex)
+	deviceSubscription, err := evmodel.GetDeviceSubscriptions(searchKey)
 	if err != nil {
 		return "", nil, err
 	}
 	location = deviceSubscription.Location
-	subscriptionDetails, err := evmodel.GetEvtSubscriptions(serverAddress)
+
+	searchKey = GetSearchKey(deviceIPAddress, evmodel.SubscriptionIndex)
+	subscriptionDetails, err := evmodel.GetEvtSubscriptions(searchKey)
 	if err != nil {
 		return "", nil, err
 	}
@@ -380,10 +401,15 @@ func getTypes(subscription string) []string {
 func updateDeviceSubscriptionLocation(r map[string]string) error {
 	for serverAddress, location := range r {
 		if location != "" {
-			deviceSubscription, err := evmodel.GetDeviceSubscriptions(serverAddress)
+			deviceIPAddress, errorMessage := GetIPFromHostName(serverAddress)
+			if errorMessage != "" {
+				continue
+			}
+			searchKey := GetSearchKey(deviceIPAddress, evmodel.DeviceSubscriptionIndex)
+			deviceSubscription, err := evmodel.GetDeviceSubscriptions(searchKey)
 			if err != nil {
-				log.Println("Error getting the device event subscription from DB ",
-					" for server address : ", serverAddress, err)
+				log.Error("Error getting the device event subscription from DB " +
+					" for server address : " + serverAddress + err.Error())
 				continue
 			}
 			var updatedDeviceSubscription evmodel.DeviceSubscription
@@ -393,8 +419,8 @@ func updateDeviceSubscriptionLocation(r map[string]string) error {
 			updatedDeviceSubscription.OriginResources = deviceSubscription.OriginResources
 			err = evmodel.UpdateDeviceSubscriptionLocation(updatedDeviceSubscription)
 			if err != nil {
-				log.Println("Error updating the subscription location in to DB for ",
-					"server address : ", serverAddress, err)
+				log.Error("Error updating the subscription location in to DB for " +
+					"server address : " + serverAddress + err.Error())
 				continue
 			}
 		}
@@ -444,4 +470,32 @@ func GenEventErrorResponse(errorMessage string, StatusMessage string, httpStatus
 	}
 	respPtr.Response = args.CreateGenericErrorResponse()
 
+}
+
+// GetIPFromHostName - look up the ip from the fqdn
+func GetIPFromHostName(fqdn string) (string, string) {
+	host, _, err := net.SplitHostPort(fqdn)
+	if err != nil {
+		host = fqdn
+	}
+	addr, err := net.LookupIP(host)
+	var errorMessage string
+	if err != nil || len(addr) < 1 {
+		errorMessage = "Can't lookup the ip from host name"
+		if err != nil {
+			errorMessage = "Can't lookup the ip from host name" + err.Error()
+		}
+	}
+	return fmt.Sprintf("%v", addr[0]), errorMessage
+}
+
+// GetSearchKey will return search key with regular expression for filtering
+func GetSearchKey(key, index string) string {
+	searchKey := key
+	if index == evmodel.SubscriptionIndex {
+		searchKey = `[^0-9]` + key + `[^0-9]`
+	} else if index == evmodel.DeviceSubscriptionIndex {
+		searchKey = key + `[^0-9]`
+	}
+	return searchKey
 }

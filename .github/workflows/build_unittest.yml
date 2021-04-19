@@ -63,6 +63,26 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
     
+    - name: Build
+      run: |
+          LIST=`ls | grep -v 'lib-rest-client' | grep -E '^svc-|^plugin-|^odimra'`
+          for i in $LIST; do
+            echo "Compiling $i"
+            cd $i
+            go mod download
+            go mod vendor
+            go build -i .
+            if [ $? -eq 0 ]; then
+              echo Build for odimra service/lib dependencies $i are Successful !!!!
+              arr1+=$i;
+            else
+              echo Build for odimra service/lib dependency $i Failed !!!!
+              arr2+=$i;
+              flag=0
+            fi
+            cd ..
+          done
+          		  
     - name: Test
       run: |
           ./build/generate_rpc_files.sh
