@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service System {
+    rpc GetSystem(SystemRequest) returns (SystemResponse) {}
+}
+
+message SystemRequest {
+    string ID = 1;
+}
+
+
+message SystemResponse {
+    int32 statusCode = 1;
+}

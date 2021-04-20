@@ -30,6 +30,7 @@ import (
 	"github.com/ODIM-Project/ODIM/svc-systems/scommon"
 	"github.com/ODIM-Project/ODIM/svc-systems/smodel"
 	"github.com/ODIM-Project/ODIM/svc-systems/systems"
+	"github.com/ODIM-Project/ODIM/svc-systems/grpcserver"
 
 	"github.com/sirupsen/logrus"
 )
@@ -71,7 +72,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error while trying to initialize the service: " + err.Error())
 	}
-
+	go grpcserver.Up()
 	registerHandler()
 	// Run server
 	if err := services.Service.Run(); err != nil {
