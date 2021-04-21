@@ -21,6 +21,7 @@ import (
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	"github.com/ODIM-Project/ODIM/lib-utilities/config"
+	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	sessionproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/session"
 	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	"github.com/ODIM-Project/ODIM/svc-account-session/asresponse"
@@ -191,7 +192,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		},
 	}
 	type args struct {
-		req *sessionproto.SessionRequest
+		req *sessiongrpcproto.SessionRequest
 	}
 	tests := []struct {
 		name string
@@ -201,7 +202,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "successful get all active session",
 			args: args{
-				req: &sessionproto.SessionRequest{
+				req: &sessiongrpcproto.SessionRequest{
 					SessionId:    sessionID,
 					SessionToken: sessionToken,
 				},
@@ -220,7 +221,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "get all sessions with no session token",
 			args: args{
-				req: &sessionproto.SessionRequest{
+				req: &sessiongrpcproto.SessionRequest{
 					SessionId:    sessionID,
 					SessionToken: "",
 				},
@@ -235,7 +236,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "get all sessions with invalid session token",
 			args: args{
-				req: &sessionproto.SessionRequest{
+				req: &sessiongrpcproto.SessionRequest{
 					SessionId:    sessionID,
 					SessionToken: "invalidToken",
 				},

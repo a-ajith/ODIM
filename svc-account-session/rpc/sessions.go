@@ -111,18 +111,18 @@ func (s *Session) GetSessionUserName(ctx context.Context, req *sessionproto.Sess
 // and respond all the sessionresponse values along with error if there is.
 func (s *Session) GetAllActiveSessions(ctx context.Context, req *sessionproto.SessionRequest, resp *sessionproto.SessionResponse) error {
 
-	response := session.GetAllActiveSessions(req)
-	body, err := json.Marshal(response.Body)
-	if err != nil {
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = "error while trying marshal the response body for get all active session: " + err.Error()
-		log.Printf(response.StatusMessage)
-		return nil
-	}
-	resp.StatusCode = response.StatusCode
-	resp.StatusMessage = response.StatusMessage
-	resp.Header = response.Header
-	resp.Body = body
+	// response := session.GetAllActiveSessions(req)
+	// body, err := json.Marshal(response.Body)
+	// if err != nil {
+	// 	resp.StatusCode = http.StatusInternalServerError
+	// 	resp.StatusMessage = "error while trying marshal the response body for get all active session: " + err.Error()
+	// 	log.Printf(response.StatusMessage)
+	// 	return nil
+	// }
+	// resp.StatusCode = response.StatusCode
+	// resp.StatusMessage = response.StatusMessage
+	// resp.Header = response.Header
+	// resp.Body = body
 	return nil
 
 }

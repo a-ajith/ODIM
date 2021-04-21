@@ -21,6 +21,7 @@ import (
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	"github.com/ODIM-Project/ODIM/lib-utilities/config"
+	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	sessionproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/session"
 	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	"github.com/ODIM-Project/ODIM/svc-account-session/asmodel"
@@ -160,7 +161,7 @@ func GetSession(req *sessionproto.SessionRequest) response.RPC {
 // it will accepts the SessionCreateRequest which will have sessionid and sessiontoken
 // and it will check privileges to get session and then get all the active sessions
 // respond RPC response and error if there is.
-func GetAllActiveSessions(req *sessionproto.SessionRequest) response.RPC {
+func GetAllActiveSessions(req *sessiongrpcproto.SessionRequest) response.RPC {
 
 	commonResponse := response.Response{
 		OdataType:    "#SessionCollection.SessionCollection",
