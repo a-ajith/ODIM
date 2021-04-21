@@ -71,21 +71,21 @@ func GetSessionRequest(sessionID, sessionToken string) (*sessionproto.SessionRes
 }
 
 // GetAllActiveSessionRequest will do the rpc call to get session
-func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessionproto.SessionResponse, error) {
+// func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessionproto.SessionResponse, error) {
 
-	asService := sessionproto.NewSessionService(services.AccountSession, services.Service.Client())
+// 	asService := sessionproto.NewSessionService(services.AccountSession, services.Service.Client())
 
-	// Call the GetAllActiveSessions
-	rsp, err := asService.GetAllActiveSessions(context.TODO(), &sessionproto.SessionRequest{
-		SessionId:    sessionID,
-		SessionToken: sessionToken,
-	})
-	if err != nil && rsp == nil {
-		return nil, fmt.Errorf("error while trying to make get session service rpc call: %v", err)
-	}
+// 	// Call the GetAllActiveSessions
+// 	rsp, err := asService.GetAllActiveSessions(context.TODO(), &sessionproto.SessionRequest{
+// 		SessionId:    sessionID,
+// 		SessionToken: sessionToken,
+// 	})
+// 	if err != nil && rsp == nil {
+// 		return nil, fmt.Errorf("error while trying to make get session service rpc call: %v", err)
+// 	}
 
-	return rsp, err
-}
+// 	return rsp, err
+// }
 
 //GetSessionServiceRequest will do the rpc call to check session
 func GetSessionServiceRequest() (*sessionproto.SessionResponse, error) {

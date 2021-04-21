@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"testing"
 
+	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	sessionproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/session"
 	iris "github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/httptest"
@@ -51,10 +52,14 @@ func mockGetSessionRPC(sessionID, sessionToken string) (*sessionproto.SessionRes
 	}, nil
 }
 
-func mockGetAllActiveSessionsRPC(sessionID, sessionToken string) (*sessionproto.SessionResponse, error) {
-	return &sessionproto.SessionResponse{
+func mockGetAllActiveSessionsRPC(sessionID, sessionToken string) (*sessiongrpcproto.SessionResponse, error) {
+	return &sessiongrpcproto.SessionResponse{
 		StatusCode: http.StatusOK,
 	}, nil
+}
+
+func mockSessionGRPCError(sessionID, sessionToken string) (*sessiongrpcproto.SessionResponse, error) {
+	return nil, errors.New("RPC Error")
 }
 
 func mockGetSessionServiceRPC() (*sessionproto.SessionResponse, error) {
@@ -163,7 +168,7 @@ func TestSessionRPCs_GetAllAciveSessions(t *testing.T) {
 
 func TestSessionRPCs_GetAllAciveSessionsRPCError(t *testing.T) {
 	var s SessionRPCs
-	s.GetAllActiveSessionsRPC = mockSessionRPCError
+	s.GetAllActiveSessionsRPC = mockSessionGRPCError
 
 	mockApp := iris.New()
 	redfishRoutes := mockApp.Party("/redfish/v1")

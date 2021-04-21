@@ -21,6 +21,7 @@ import (
 	"net/http"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
+	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	sessionproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/session"
 	"github.com/ODIM-Project/ODIM/lib-utilities/response"
 	iris "github.com/kataras/iris/v12"
@@ -31,7 +32,7 @@ type SessionRPCs struct {
 	CreateSessionRPC        func(sessionproto.SessionCreateRequest) (*sessionproto.SessionCreateResponse, error)
 	DeleteSessionRPC        func(string, string) (*sessionproto.SessionResponse, error)
 	GetSessionRPC           func(string, string) (*sessionproto.SessionResponse, error)
-	GetAllActiveSessionsRPC func(string, string) (*sessionproto.SessionResponse, error)
+	GetAllActiveSessionsRPC func(string, string) (*sessiongrpcproto.SessionResponse, error)
 	GetSessionServiceRPC    func() (*sessionproto.SessionResponse, error)
 }
 
