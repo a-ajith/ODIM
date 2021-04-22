@@ -35,7 +35,7 @@ import (
 func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcproto.GRPCResponse, error) {
 	log.Info("GRPC connection initiated")
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"10.24.1.209:2379"},
+		Endpoints:   []string{"etcd:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	kv := clientv3.NewKV(cli)

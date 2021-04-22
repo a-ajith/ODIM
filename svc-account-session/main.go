@@ -78,7 +78,7 @@ func registerHandlers() {
 
 func registerSession() {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"10.24.1.209:2379"},
+		Endpoints:   []string{"etcd:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	kv := clientv3.NewKV(cli)
