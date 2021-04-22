@@ -62,11 +62,11 @@ func main() {
 	if err := services.InitializeService(services.AccountSession); err != nil {
 		log.Fatal("Error while trying to initialize the service: " + err.Error())
 	}
-	go registerSession()
-	registerHandlers()
-	if err := services.Service.Run(); err != nil {
-		log.Fatal("Failed to run a service: " + err.Error())
-	}
+	registerSession()
+	// registerHandlers()
+	// if err := services.Service.Run(); err != nil {
+	// 	log.Fatal("Failed to run a service: " + err.Error())
+	// }
 }
 
 func registerHandlers() {
@@ -82,7 +82,7 @@ func registerSession() {
 		DialTimeout: 5 * time.Second,
 	})
 	kv := clientv3.NewKV(cli)
-	r, err := kv.Put(context.TODO(), services.AccountSession, "10.24.1.209:8081")
+	r, err := kv.Put(context.TODO(), services.AccountSession, "account-session:45101")
 	if err != nil {
 		log.Fatal("While trying to register the service, got: " + err.Error())
 		return
@@ -99,7 +99,7 @@ func registerSession() {
 	var session rpc.GRPCSession
 	sessiongrpcproto.RegisterSessionServer(gs, &session)
 
-	l, err := net.Listen("tcp", "10.24.1.209:8081")
+	l, err := net.Listen("tcp", "account-session:45101")
 	if err != nil {
 		log.Fatal("While trying to get listen for the grpc, got: ", err.Error())
 		return
