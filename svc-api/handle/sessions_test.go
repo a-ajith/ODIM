@@ -52,13 +52,13 @@ func mockGetSessionRPC(sessionID, sessionToken string) (*sessionproto.SessionRes
 	}, nil
 }
 
-func mockGetAllActiveSessionsRPC(sessionID, sessionToken string) (*sessiongrpcproto.SessionResponse, error) {
-	return &sessiongrpcproto.SessionResponse{
+func mockGetAllActiveSessionsRPC(sessionID, sessionToken string) (*sessiongrpcproto.GRPCResponse, error) {
+	return &sessiongrpcproto.GRPCResponse{
 		StatusCode: http.StatusOK,
 	}, nil
 }
 
-func mockSessionGRPCError(sessionID, sessionToken string) (*sessiongrpcproto.SessionResponse, error) {
+func mockSessionGRPCError(sessionID, sessionToken string) (*sessiongrpcproto.GRPCResponse, error) {
 	return nil, errors.New("RPC Error")
 }
 

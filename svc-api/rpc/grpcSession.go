@@ -29,7 +29,7 @@ import (
 )
 
 // GetAllActiveSessionRequest will do the rpc call to get session
-func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcproto.SessionResponse, error) {
+func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcproto.GRPCResponse, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"10.24.1.209:2379"},
 		DialTimeout: 5 * time.Second,
@@ -49,7 +49,7 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 	sc := sessiongrpcproto.NewSessionClient(conn)
 	rsp, err := sc.GetAllActiveSessions(
 		context.Background(),
-		&sessiongrpcproto.SessionRequest{
+		&sessiongrpcproto.GRPCRequest{
 			SessionId:    sessionID,
 			SessionToken: sessionToken,
 		},
@@ -57,7 +57,7 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 	// asService := sessiongrpcproto.NewSessionService(services.AccountSession, services.Service.Client())
 
 	// Call the GetAllActiveSessions
-	// rsp, err := asService.GetAllActiveSessions(context.TODO(), &sessiongrpcproto.SessionRequest{
+	// rsp, err := asService.GetAllActiveSessions(context.TODO(), &sessiongrpcproto.GRPCRequest{
 	// 	SessionId:    sessionID,
 	// 	SessionToken: sessionToken,
 	// })

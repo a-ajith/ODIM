@@ -16,8 +16,9 @@
 package session
 
 import (
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	"github.com/ODIM-Project/ODIM/lib-utilities/config"
@@ -161,7 +162,7 @@ func GetSession(req *sessionproto.SessionRequest) response.RPC {
 // it will accepts the SessionCreateRequest which will have sessionid and sessiontoken
 // and it will check privileges to get session and then get all the active sessions
 // respond RPC response and error if there is.
-func GetAllActiveSessions(req *sessiongrpcproto.SessionRequest) response.RPC {
+func GetAllActiveSessions(req *sessiongrpcproto.GRPCRequest) response.RPC {
 
 	commonResponse := response.Response{
 		OdataType:    "#SessionCollection.SessionCollection",

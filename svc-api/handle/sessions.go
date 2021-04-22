@@ -17,8 +17,9 @@ package handle
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ODIM-Project/ODIM/lib-utilities/common"
 	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
@@ -32,7 +33,7 @@ type SessionRPCs struct {
 	CreateSessionRPC        func(sessionproto.SessionCreateRequest) (*sessionproto.SessionCreateResponse, error)
 	DeleteSessionRPC        func(string, string) (*sessionproto.SessionResponse, error)
 	GetSessionRPC           func(string, string) (*sessionproto.SessionResponse, error)
-	GetAllActiveSessionsRPC func(string, string) (*sessiongrpcproto.SessionResponse, error)
+	GetAllActiveSessionsRPC func(string, string) (*sessiongrpcproto.GRPCResponse, error)
 	GetSessionServiceRPC    func() (*sessionproto.SessionResponse, error)
 }
 

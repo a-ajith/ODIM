@@ -18,6 +18,7 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+
 	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	"github.com/ODIM-Project/ODIM/svc-account-session/session"
 
@@ -32,7 +33,7 @@ type GRPCSession struct{}
 // This method will accepts the sessionrequest which has session id and session token
 // and it will call GetAllActiveSessions from the session package
 // and respond all the sessionresponse values along with error if there is.
-func (s *GRPCSession) GetAllActiveSessions(ctx context.Context, req *sessiongrpcproto.SessionRequest) (resp *sessiongrpcproto.SessionResponse, err error) {
+func (s *GRPCSession) GetAllActiveSessions(ctx context.Context, req *sessiongrpcproto.GRPCRequest) (resp *sessiongrpcproto.GRPCResponse, err error) {
 
 	response := session.GetAllActiveSessions(req)
 	body, err := json.Marshal(response.Body)

@@ -24,7 +24,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type SessionRequest struct {
+type GRPCRequest struct {
 	SessionId            string   `protobuf:"bytes,1,opt,name=sessionId,proto3" json:"sessionId,omitempty"`
 	SessionToken         string   `protobuf:"bytes,2,opt,name=sessionToken,proto3" json:"sessionToken,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -32,46 +32,46 @@ type SessionRequest struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SessionRequest) Reset()         { *m = SessionRequest{} }
-func (m *SessionRequest) String() string { return proto.CompactTextString(m) }
-func (*SessionRequest) ProtoMessage()    {}
-func (*SessionRequest) Descriptor() ([]byte, []int) {
+func (m *GRPCRequest) Reset()         { *m = GRPCRequest{} }
+func (m *GRPCRequest) String() string { return proto.CompactTextString(m) }
+func (*GRPCRequest) ProtoMessage()    {}
+func (*GRPCRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_3a6be1b361fa6f14, []int{0}
 }
 
-func (m *SessionRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SessionRequest.Unmarshal(m, b)
+func (m *GRPCRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GRPCRequest.Unmarshal(m, b)
 }
-func (m *SessionRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SessionRequest.Marshal(b, m, deterministic)
+func (m *GRPCRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GRPCRequest.Marshal(b, m, deterministic)
 }
-func (m *SessionRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SessionRequest.Merge(m, src)
+func (m *GRPCRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GRPCRequest.Merge(m, src)
 }
-func (m *SessionRequest) XXX_Size() int {
-	return xxx_messageInfo_SessionRequest.Size(m)
+func (m *GRPCRequest) XXX_Size() int {
+	return xxx_messageInfo_GRPCRequest.Size(m)
 }
-func (m *SessionRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_SessionRequest.DiscardUnknown(m)
+func (m *GRPCRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GRPCRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SessionRequest proto.InternalMessageInfo
+var xxx_messageInfo_GRPCRequest proto.InternalMessageInfo
 
-func (m *SessionRequest) GetSessionId() string {
+func (m *GRPCRequest) GetSessionId() string {
 	if m != nil {
 		return m.SessionId
 	}
 	return ""
 }
 
-func (m *SessionRequest) GetSessionToken() string {
+func (m *GRPCRequest) GetSessionToken() string {
 	if m != nil {
 		return m.SessionToken
 	}
 	return ""
 }
 
-type SessionResponse struct {
+type GRPCResponse struct {
 	StatusCode           int32             `protobuf:"varint,1,opt,name=statusCode,proto3" json:"statusCode,omitempty"`
 	StatusMessage        string            `protobuf:"bytes,2,opt,name=statusMessage,proto3" json:"statusMessage,omitempty"`
 	Header               map[string]string `protobuf:"bytes,3,rep,name=header,proto3" json:"header,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
@@ -81,53 +81,53 @@ type SessionResponse struct {
 	XXX_sizecache        int32             `json:"-"`
 }
 
-func (m *SessionResponse) Reset()         { *m = SessionResponse{} }
-func (m *SessionResponse) String() string { return proto.CompactTextString(m) }
-func (*SessionResponse) ProtoMessage()    {}
-func (*SessionResponse) Descriptor() ([]byte, []int) {
+func (m *GRPCResponse) Reset()         { *m = GRPCResponse{} }
+func (m *GRPCResponse) String() string { return proto.CompactTextString(m) }
+func (*GRPCResponse) ProtoMessage()    {}
+func (*GRPCResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_3a6be1b361fa6f14, []int{1}
 }
 
-func (m *SessionResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SessionResponse.Unmarshal(m, b)
+func (m *GRPCResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GRPCResponse.Unmarshal(m, b)
 }
-func (m *SessionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SessionResponse.Marshal(b, m, deterministic)
+func (m *GRPCResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GRPCResponse.Marshal(b, m, deterministic)
 }
-func (m *SessionResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SessionResponse.Merge(m, src)
+func (m *GRPCResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GRPCResponse.Merge(m, src)
 }
-func (m *SessionResponse) XXX_Size() int {
-	return xxx_messageInfo_SessionResponse.Size(m)
+func (m *GRPCResponse) XXX_Size() int {
+	return xxx_messageInfo_GRPCResponse.Size(m)
 }
-func (m *SessionResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_SessionResponse.DiscardUnknown(m)
+func (m *GRPCResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GRPCResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SessionResponse proto.InternalMessageInfo
+var xxx_messageInfo_GRPCResponse proto.InternalMessageInfo
 
-func (m *SessionResponse) GetStatusCode() int32 {
+func (m *GRPCResponse) GetStatusCode() int32 {
 	if m != nil {
 		return m.StatusCode
 	}
 	return 0
 }
 
-func (m *SessionResponse) GetStatusMessage() string {
+func (m *GRPCResponse) GetStatusMessage() string {
 	if m != nil {
 		return m.StatusMessage
 	}
 	return ""
 }
 
-func (m *SessionResponse) GetHeader() map[string]string {
+func (m *GRPCResponse) GetHeader() map[string]string {
 	if m != nil {
 		return m.Header
 	}
 	return nil
 }
 
-func (m *SessionResponse) GetBody() []byte {
+func (m *GRPCResponse) GetBody() []byte {
 	if m != nil {
 		return m.Body
 	}
@@ -135,31 +135,31 @@ func (m *SessionResponse) GetBody() []byte {
 }
 
 func init() {
-	proto.RegisterType((*SessionRequest)(nil), "SessionRequest")
-	proto.RegisterType((*SessionResponse)(nil), "SessionResponse")
-	proto.RegisterMapType((map[string]string)(nil), "SessionResponse.HeaderEntry")
+	proto.RegisterType((*GRPCRequest)(nil), "GRPCRequest")
+	proto.RegisterType((*GRPCResponse)(nil), "GRPCResponse")
+	proto.RegisterMapType((map[string]string)(nil), "GRPCResponse.HeaderEntry")
 }
 
 func init() { proto.RegisterFile("session.proto", fileDescriptor_3a6be1b361fa6f14) }
 
 var fileDescriptor_3a6be1b361fa6f14 = []byte{
 	// 259 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x91, 0xcd, 0x4e, 0xc3, 0x30,
-	0x10, 0x84, 0x71, 0xd3, 0x16, 0x75, 0xdb, 0xd2, 0x6a, 0xd5, 0x43, 0x54, 0x55, 0x28, 0x8a, 0x38,
-	0xe4, 0x94, 0x43, 0xe1, 0xc0, 0xcf, 0xa9, 0x42, 0xfc, 0x1d, 0xb8, 0x18, 0x5e, 0x20, 0xc5, 0x2b,
-	0xa8, 0x1a, 0xd9, 0x25, 0xeb, 0x54, 0xca, 0xbb, 0xf2, 0x30, 0x08, 0xc7, 0x40, 0x93, 0xdb, 0xce,
-	0xe7, 0xd1, 0xec, 0xd8, 0x86, 0x31, 0x13, 0xf3, 0xc6, 0xe8, 0x74, 0x57, 0x18, 0x6b, 0x62, 0x09,
-	0x27, 0x2f, 0x35, 0x90, 0xf4, 0x59, 0x12, 0x5b, 0x5c, 0xc0, 0xc0, 0x5b, 0x9e, 0x54, 0x28, 0x22,
-	0x91, 0x0c, 0xe4, 0x3f, 0xc0, 0x18, 0x46, 0x5e, 0xbc, 0x9a, 0x2d, 0xe9, 0xb0, 0xe3, 0x0c, 0x0d,
-	0x16, 0x7f, 0x09, 0x98, 0xfc, 0x85, 0xf2, 0xce, 0x68, 0x26, 0x3c, 0x05, 0x60, 0x9b, 0xd9, 0x92,
-	0x6f, 0x8d, 0x22, 0x17, 0xdb, 0x93, 0x07, 0x04, 0xcf, 0x60, 0x5c, 0xab, 0x67, 0x62, 0xce, 0xde,
-	0xc9, 0x07, 0x37, 0x21, 0x5e, 0x40, 0xff, 0x83, 0x32, 0x45, 0x45, 0x18, 0x44, 0x41, 0x32, 0x5c,
-	0x2e, 0xd2, 0xd6, 0x9e, 0xf4, 0xd1, 0x1d, 0xdf, 0x69, 0x5b, 0x54, 0xd2, 0x7b, 0x11, 0xa1, 0xbb,
-	0x36, 0xaa, 0x0a, 0xbb, 0x91, 0x48, 0x46, 0xd2, 0xcd, 0xf3, 0x2b, 0x18, 0x1e, 0x58, 0x71, 0x0a,
-	0xc1, 0x96, 0x2a, 0x7f, 0xdd, 0x9f, 0x11, 0x67, 0xd0, 0xdb, 0x67, 0x79, 0xf9, 0x5b, 0xa4, 0x16,
-	0xd7, 0x9d, 0x4b, 0xb1, 0xbc, 0x87, 0x63, 0xbf, 0x15, 0x6f, 0x60, 0xf6, 0x40, 0x76, 0x95, 0xe7,
-	0xab, 0x37, 0xbb, 0xd9, 0x93, 0xc7, 0x8c, 0x93, 0xb4, 0xf9, 0xa8, 0xf3, 0x69, 0xbb, 0x68, 0x7c,
-	0xb4, 0xee, 0xbb, 0x1f, 0x38, 0xff, 0x0e, 0x00, 0x00, 0xff, 0xff, 0x90, 0xc8, 0x45, 0x11, 0x92,
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x90, 0xcf, 0x4a, 0xc3, 0x40,
+	0x10, 0xc6, 0xdd, 0xa6, 0xad, 0x74, 0x92, 0x80, 0x0c, 0x3d, 0xc4, 0x22, 0x12, 0x82, 0x87, 0x9c,
+	0x02, 0x56, 0x04, 0xf5, 0x64, 0x29, 0x52, 0x3d, 0x88, 0xb2, 0xfa, 0x02, 0xa9, 0x19, 0xb4, 0x34,
+	0x64, 0x6b, 0x66, 0x53, 0xc8, 0x8b, 0xfa, 0x3c, 0xe2, 0x66, 0xa5, 0x9b, 0xdb, 0x7c, 0xbf, 0xf9,
+	0xf8, 0xe6, 0x0f, 0x84, 0x4c, 0xcc, 0x1b, 0x55, 0x65, 0xbb, 0x5a, 0x69, 0x95, 0xbc, 0x80, 0xbf,
+	0x92, 0xaf, 0x4b, 0x49, 0xdf, 0x0d, 0xb1, 0xc6, 0x33, 0x98, 0xd8, 0xfe, 0x53, 0x11, 0x89, 0x58,
+	0xa4, 0x13, 0x79, 0x00, 0x98, 0x40, 0x60, 0xc5, 0xbb, 0xda, 0x52, 0x15, 0x0d, 0x8c, 0xa1, 0xc7,
+	0x92, 0x1f, 0x01, 0x41, 0x97, 0xc8, 0x3b, 0x55, 0x31, 0xe1, 0x39, 0x00, 0xeb, 0x5c, 0x37, 0xbc,
+	0x54, 0x05, 0x99, 0xcc, 0x91, 0x74, 0x08, 0x5e, 0x40, 0xd8, 0xa9, 0x67, 0x62, 0xce, 0x3f, 0xc9,
+	0xa6, 0xf6, 0x21, 0x5e, 0xc2, 0xf8, 0x8b, 0xf2, 0x82, 0xea, 0xc8, 0x8b, 0xbd, 0xd4, 0x9f, 0x9f,
+	0x66, 0xee, 0x90, 0xec, 0xd1, 0xf4, 0x1e, 0x2a, 0x5d, 0xb7, 0xd2, 0x1a, 0x11, 0x61, 0xb8, 0x56,
+	0x45, 0x1b, 0x0d, 0x63, 0x91, 0x06, 0xd2, 0xd4, 0xb3, 0x5b, 0xf0, 0x1d, 0x2b, 0x9e, 0x80, 0xb7,
+	0xa5, 0xd6, 0x1e, 0xfa, 0x57, 0xe2, 0x14, 0x46, 0xfb, 0xbc, 0x6c, 0xfe, 0xb7, 0xe8, 0xc4, 0xdd,
+	0xe0, 0x46, 0xcc, 0xef, 0xe1, 0xf8, 0xad, 0x3b, 0x14, 0xaf, 0x61, 0xba, 0x22, 0xbd, 0x28, 0xcb,
+	0xc5, 0x87, 0xde, 0xec, 0xc9, 0x62, 0xc6, 0x20, 0x73, 0x7e, 0x39, 0x0b, 0x7b, 0x2b, 0x26, 0x47,
+	0xeb, 0xb1, 0x79, 0xf9, 0xd5, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x61, 0xaa, 0xb7, 0xcd, 0x83,
 	0x01, 0x00, 0x00,
 }
 
@@ -175,7 +175,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type SessionClient interface {
-	GetAllActiveSessions(ctx context.Context, in *SessionRequest, opts ...grpc.CallOption) (*SessionResponse, error)
+	GetAllActiveSessions(ctx context.Context, in *GRPCRequest, opts ...grpc.CallOption) (*GRPCResponse, error)
 }
 
 type sessionClient struct {
@@ -186,8 +186,8 @@ func NewSessionClient(cc *grpc.ClientConn) SessionClient {
 	return &sessionClient{cc}
 }
 
-func (c *sessionClient) GetAllActiveSessions(ctx context.Context, in *SessionRequest, opts ...grpc.CallOption) (*SessionResponse, error) {
-	out := new(SessionResponse)
+func (c *sessionClient) GetAllActiveSessions(ctx context.Context, in *GRPCRequest, opts ...grpc.CallOption) (*GRPCResponse, error) {
+	out := new(GRPCResponse)
 	err := c.cc.Invoke(ctx, "/Session/GetAllActiveSessions", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -197,14 +197,14 @@ func (c *sessionClient) GetAllActiveSessions(ctx context.Context, in *SessionReq
 
 // SessionServer is the server API for Session service.
 type SessionServer interface {
-	GetAllActiveSessions(context.Context, *SessionRequest) (*SessionResponse, error)
+	GetAllActiveSessions(context.Context, *GRPCRequest) (*GRPCResponse, error)
 }
 
 // UnimplementedSessionServer can be embedded to have forward compatible implementations.
 type UnimplementedSessionServer struct {
 }
 
-func (*UnimplementedSessionServer) GetAllActiveSessions(ctx context.Context, req *SessionRequest) (*SessionResponse, error) {
+func (*UnimplementedSessionServer) GetAllActiveSessions(ctx context.Context, req *GRPCRequest) (*GRPCResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllActiveSessions not implemented")
 }
 
@@ -213,7 +213,7 @@ func RegisterSessionServer(s *grpc.Server, srv SessionServer) {
 }
 
 func _Session_GetAllActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SessionRequest)
+	in := new(GRPCRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func _Session_GetAllActiveSessions_Handler(srv interface{}, ctx context.Context,
 		FullMethod: "/Session/GetAllActiveSessions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServer).GetAllActiveSessions(ctx, req.(*SessionRequest))
+		return srv.(SessionServer).GetAllActiveSessions(ctx, req.(*GRPCRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

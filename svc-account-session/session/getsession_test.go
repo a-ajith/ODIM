@@ -192,7 +192,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		},
 	}
 	type args struct {
-		req *sessiongrpcproto.SessionRequest
+		req *sessiongrpcproto.GRPCRequest
 	}
 	tests := []struct {
 		name string
@@ -202,7 +202,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "successful get all active session",
 			args: args{
-				req: &sessiongrpcproto.SessionRequest{
+				req: &sessiongrpcproto.GRPCRequest{
 					SessionId:    sessionID,
 					SessionToken: sessionToken,
 				},
@@ -221,7 +221,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "get all sessions with no session token",
 			args: args{
-				req: &sessiongrpcproto.SessionRequest{
+				req: &sessiongrpcproto.GRPCRequest{
 					SessionId:    sessionID,
 					SessionToken: "",
 				},
@@ -236,7 +236,7 @@ func TestGetAllActiveSessions(t *testing.T) {
 		{
 			name: "get all sessions with invalid session token",
 			args: args{
-				req: &sessiongrpcproto.SessionRequest{
+				req: &sessiongrpcproto.GRPCRequest{
 					SessionId:    sessionID,
 					SessionToken: "invalidToken",
 				},
