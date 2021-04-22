@@ -95,7 +95,7 @@ func registerSession() {
 	// 	return
 	// }
 	gs := grpc.NewServer(
-		// grpc.Creds(tlsCredentials),
+	// grpc.Creds(tlsCredentials),
 	)
 	var session rpc.GRPCSession
 	sessiongrpcproto.RegisterSessionServer(gs, &session)

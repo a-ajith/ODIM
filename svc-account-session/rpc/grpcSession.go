@@ -33,20 +33,19 @@ type GRPCSession struct{}
 // This method will accepts the sessionrequest which has session id and session token
 // and it will call GetAllActiveSessions from the session package
 // and respond all the sessionresponse values along with error if there is.
-func (s *GRPCSession) GetAllActiveSessions(ctx context.Context, req *sessiongrpcproto.GRPCRequest) (resp *sessiongrpcproto.GRPCResponse, err error) {
+func (s *GRPCSession) GetAllActiveSessions(ctx context.Context, req *sessiongrpcproto.GRPCRequest) (*sessiongrpcproto.GRPCResponse, error) {
 	log.Info("GRPC communication is successful")
 	response := session.GetAllActiveSessions(req)
 	body, err := json.Marshal(response.Body)
 	if err != nil {
-		resp.StatusCode = http.StatusInternalServerError
-		resp.StatusMessage = "error while trying marshal the response body for get all active session: " + err.Error()
-		log.Error(response.StatusMessage)
-		return resp, nil
+		response.StatusCode = http.StatusInternalServerError
+		body = []byte("While trying marshal the response body for get all active session, got: " + err.Error())
+		log.Error(string(body))
 	}
-	resp.StatusCode = response.StatusCode
-	resp.StatusMessage = response.StatusMessage
-	resp.Header = response.Header
-	resp.Body = body
-	return resp, nil
-
+	return &sessiongrpcproto.GRPCResponse{
+		StatusCode:    response.StatusCode,
+		StatusMessage: response.StatusMessage,
+		Header:        response.Header,
+		Body:          body,
+	}, nil
 }
