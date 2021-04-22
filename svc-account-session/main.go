@@ -63,6 +63,7 @@ func main() {
 		log.Fatal("Error while trying to initialize the service: " + err.Error())
 	}
 	registerSession()
+	log.Warn("GRPC service is down")
 	// registerHandlers()
 	// if err := services.Service.Run(); err != nil {
 	// 	log.Fatal("Failed to run a service: " + err.Error())
@@ -104,7 +105,7 @@ func registerSession() {
 		log.Fatal("While trying to get listen for the grpc, got: ", err.Error())
 		return
 	}
-
+	log.Info("GRPC Service is up")
 	gs.Serve(l)
 }
 
