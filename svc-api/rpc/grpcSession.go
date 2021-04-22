@@ -46,15 +46,15 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 	}
 	log.Info("The value from etcd: ", resp)
 
-	tlsCredentials, err := loadTLSCredentials()
-    if err != nil {
-		log.Fatal("cannot load TLS credentials: "+ err.Error())
-		return nil, nil
-    }
+	// tlsCredentials, err := loadTLSCredentials()
+    // if err != nil {
+	// 	log.Fatal("cannot load TLS credentials: "+ err.Error())
+	// 	return nil, nil
+    // }
 
 	conn, err := grpc.Dial(
 		string(resp.Kvs[0].Value),
-		grpc.WithTransportCredentials(tlsCredentials),
+		// grpc.WithTransportCredentials(tlsCredentials),
 	)
 	if err != nil {
 		log.Error("While connecting with the GRPC, got: " + err.Error())

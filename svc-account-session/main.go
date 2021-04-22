@@ -64,10 +64,10 @@ func main() {
 	}
 	registerSession()
 	log.Warn("GRPC service is down")
-	// registerHandlers()
-	// if err := services.Service.Run(); err != nil {
-	// 	log.Fatal("Failed to run a service: " + err.Error())
-	// }
+	registerHandlers()
+	if err := services.Service.Run(); err != nil {
+		log.Fatal("Failed to run a service: " + err.Error())
+	}
 }
 
 func registerHandlers() {
@@ -89,13 +89,13 @@ func registerSession() {
 		return
 	}
 	log.Infof("ETCD response: %v", r)
-	tlsCredentials, err := loadTLSCredentials()
-	if err != nil {
-		log.Fatal("cannot load TLS credentials: ", err)
-		return
-	}
+	// tlsCredentials, err := loadTLSCredentials()
+	// if err != nil {
+	// 	log.Fatal("cannot load TLS credentials: ", err)
+	// 	return
+	// }
 	gs := grpc.NewServer(
-		grpc.Creds(tlsCredentials),
+		// grpc.Creds(tlsCredentials),
 	)
 	var session rpc.GRPCSession
 	sessiongrpcproto.RegisterSessionServer(gs, &session)
