@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"os"
 	"time"
@@ -31,6 +32,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var log = logrus.New()
@@ -80,12 +82,20 @@ func registerSession() {
 		DialTimeout: 5 * time.Second,
 	})
 	kv := clientv3.NewKV(cli)
-	_, err = kv.Put(context.TODO(), services.AccountSession, "10.24.1.209:8081")
+	r, err := kv.Put(context.TODO(), services.AccountSession, "10.24.1.209:8081")
 	if err != nil {
 		log.Fatal("While trying to register the service, got: " + err.Error())
 		return
 	}
-	gs := grpc.NewServer()
+	log.Infof("ETCD response: %v", r)
+	tlsCredentials, err := loadTLSCredentials()
+	if err != nil {
+		log.Fatal("cannot load TLS credentials: ", err)
+		return
+	}
+	gs := grpc.NewServer(
+		grpc.Creds(tlsCredentials),
+	)
 	var session rpc.GRPCSession
 	sessiongrpcproto.RegisterSessionServer(gs, &session)
 
@@ -96,4 +106,23 @@ func registerSession() {
 	}
 
 	gs.Serve(l)
+}
+
+func loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load server's certificate and private key
+	serverCert, err := tls.LoadX509KeyPair(
+		config.Data.KeyCertConf.RPCCertificatePath,
+		config.Data.KeyCertConf.RPCPrivateKeyPath,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert,
+	}
+
+	return credentials.NewTLS(config), nil
 }

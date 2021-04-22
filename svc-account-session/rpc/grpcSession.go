@@ -22,7 +22,7 @@ import (
 	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	"github.com/ODIM-Project/ODIM/svc-account-session/session"
 
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -34,13 +34,13 @@ type GRPCSession struct{}
 // and it will call GetAllActiveSessions from the session package
 // and respond all the sessionresponse values along with error if there is.
 func (s *GRPCSession) GetAllActiveSessions(ctx context.Context, req *sessiongrpcproto.GRPCRequest) (resp *sessiongrpcproto.GRPCResponse, err error) {
-
+	log.Info("GRPC communication is successful")
 	response := session.GetAllActiveSessions(req)
 	body, err := json.Marshal(response.Body)
 	if err != nil {
 		resp.StatusCode = http.StatusInternalServerError
 		resp.StatusMessage = "error while trying marshal the response body for get all active session: " + err.Error()
-		log.Printf(response.StatusMessage)
+		log.Error(response.StatusMessage)
 		return resp, nil
 	}
 	resp.StatusCode = response.StatusCode
