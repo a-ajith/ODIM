@@ -54,6 +54,7 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 
 	conn, err := grpc.Dial(
 		string(resp.Kvs[0].Value),
+		grpc.WithInsecure(),
 		// grpc.WithTransportCredentials(tlsCredentials),
 	)
 	if err != nil {
