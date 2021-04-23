@@ -172,54 +172,54 @@ func GetAllActiveSessions(req *sessiongrpcproto.GRPCRequest) response.RPC {
 	}
 
 	var resp response.RPC
-	errorArgs := []response.ErrArgs{
-		response.ErrArgs{
-			StatusMessage: "",
-			ErrorMessage:  "",
-			MessageArgs:   []interface{}{},
-		},
-	}
-	args := &response.Args{
-		Code:      response.GeneralError,
-		Message:   "",
-		ErrorArgs: errorArgs,
-	}
+	// errorArgs := []response.ErrArgs{
+	// 	response.ErrArgs{
+	// 		StatusMessage: "",
+	// 		ErrorMessage:  "",
+	// 		MessageArgs:   []interface{}{},
+	// 	},
+	// }
+	// args := &response.Args{
+	// 	Code:      response.GeneralError,
+	// 	Message:   "",
+	// 	ErrorArgs: errorArgs,
+	// }
 
-	// Validating the session
-	currentSession, gerr := auth.CheckSessionTimeOut(req.SessionToken)
-	if gerr != nil {
-		errorMessage := "Unable to authorize session token: " + gerr.Error()
-		resp.StatusCode, resp.StatusMessage = gerr.GetAuthStatusCodeAndMessage()
-		if resp.StatusCode == http.StatusServiceUnavailable {
-			resp.Body = common.GeneralError(resp.StatusCode, resp.StatusMessage, errorMessage, []interface{}{config.Data.DBConf.InMemoryHost + ":" + config.Data.DBConf.InMemoryPort}, nil).Body
-		} else {
-			resp.Body = common.GeneralError(resp.StatusCode, resp.StatusMessage, errorMessage, nil, nil).Body
-		}
-		resp.Header = getHeader()
-		log.Error(errorMessage)
-		return resp
-	}
+	// // Validating the session
+	// currentSession, gerr := auth.CheckSessionTimeOut(req.SessionToken)
+	// if gerr != nil {
+	// 	errorMessage := "Unable to authorize session token: " + gerr.Error()
+	// 	resp.StatusCode, resp.StatusMessage = gerr.GetAuthStatusCodeAndMessage()
+	// 	if resp.StatusCode == http.StatusServiceUnavailable {
+	// 		resp.Body = common.GeneralError(resp.StatusCode, resp.StatusMessage, errorMessage, []interface{}{config.Data.DBConf.InMemoryHost + ":" + config.Data.DBConf.InMemoryPort}, nil).Body
+	// 	} else {
+	// 		resp.Body = common.GeneralError(resp.StatusCode, resp.StatusMessage, errorMessage, nil, nil).Body
+	// 	}
+	// 	resp.Header = getHeader()
+	// 	log.Error(errorMessage)
+	// 	return resp
+	// }
 
-	err := UpdateLastUsedTime(req.SessionToken)
-	if err != nil {
-		errorMessage := "Unable to update last used time of session with token " + req.SessionToken + ": " + err.Error()
-		resp.CreateInternalErrorResponse(errorMessage)
-		resp.Header = getHeader()
-		log.Error(errorMessage)
-		return resp
-	}
+	// err := UpdateLastUsedTime(req.SessionToken)
+	// if err != nil {
+	// 	errorMessage := "Unable to update last used time of session with token " + req.SessionToken + ": " + err.Error()
+	// 	resp.CreateInternalErrorResponse(errorMessage)
+	// 	resp.Header = getHeader()
+	// 	log.Error(errorMessage)
+	// 	return resp
+	// }
 
-	if !currentSession.Privileges[common.PrivilegeConfigureSelf] && !currentSession.Privileges[common.PrivilegeConfigureUsers] {
-		errorMessage := "Insufficient privileges: " + err.Error()
-		resp.StatusCode = http.StatusForbidden
-		resp.StatusMessage = response.InsufficientPrivilege
-		errorArgs[0].ErrorMessage = errorMessage
-		errorArgs[0].StatusMessage = resp.StatusMessage
-		resp.Body = args.CreateGenericErrorResponse()
-		resp.Header = getHeader()
-		log.Error(errorMessage)
-		return resp
-	}
+	// if !currentSession.Privileges[common.PrivilegeConfigureSelf] && !currentSession.Privileges[common.PrivilegeConfigureUsers] {
+	// 	errorMessage := "Insufficient privileges: " + err.Error()
+	// 	resp.StatusCode = http.StatusForbidden
+	// 	resp.StatusMessage = response.InsufficientPrivilege
+	// 	errorArgs[0].ErrorMessage = errorMessage
+	// 	errorArgs[0].StatusMessage = resp.StatusMessage
+	// 	resp.Body = args.CreateGenericErrorResponse()
+	// 	resp.Header = getHeader()
+	// 	log.Error(errorMessage)
+	// 	return resp
+	// }
 
 	sessionTokens, errs := asmodel.GetAllSessionKeys()
 	if errs != nil {
@@ -238,12 +238,12 @@ func GetAllActiveSessions(req *sessiongrpcproto.GRPCRequest) response.RPC {
 			continue
 		}
 
-		if checkPrivilege(req.SessionToken, session, currentSession) {
-			member := asresponse.ListMember{
-				OdataID: "/redfish/v1/SessionService/Sessions/" + session.ID + "/",
-			}
-			listMembers = append(listMembers, member)
+		// if checkPrivilege(req.SessionToken, session, currentSession) {
+		member := asresponse.ListMember{
+			OdataID: "/redfish/v1/SessionService/Sessions/" + session.ID + "/",
 		}
+		listMembers = append(listMembers, member)
+		// }
 	}
 	sessionTokens = nil
 	respBody := asresponse.List{
