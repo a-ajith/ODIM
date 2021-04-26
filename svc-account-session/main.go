@@ -83,24 +83,24 @@ func registerSession() {
 		DialTimeout: 5 * time.Second,
 	})
 	kv := clientv3.NewKV(cli)
-	r, err := kv.Put(context.TODO(), services.AccountSession, "account-session:45101")
+	r, err := kv.Put(context.TODO(), services.AccountSession, "account-session:45222")
 	if err != nil {
 		log.Fatal("While trying to register the service, got: " + err.Error())
 		return
 	}
 	log.Infof("ETCD response: %v", r)
-	// tlsCredentials, err := loadTLSCredentials()
-	// if err != nil {
-	// 	log.Fatal("cannot load TLS credentials: ", err)
-	// 	return
-	// }
+	tlsCredentials, err := loadTLSCredentials()
+	if err != nil {
+		log.Fatal("cannot load TLS credentials: ", err)
+		return
+	}
 	gs := grpc.NewServer(
-	// grpc.Creds(tlsCredentials),
+		grpc.Creds(tlsCredentials),
 	)
 	var session rpc.GRPCSession
 	sessiongrpcproto.RegisterSessionServer(gs, &session)
 
-	l, err := net.Listen("tcp", "account-session:45101")
+	l, err := net.Listen("tcp", "account-session:45222")
 	if err != nil {
 		log.Fatal("While trying to get listen for the grpc, got: ", err.Error())
 		return
@@ -123,6 +123,7 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 	config := &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
 		ClientAuth:   tls.NoClientCert,
+		ServerName:   config.Data.LocalhostFQDN,
 	}
 
 	return credentials.NewTLS(config), nil

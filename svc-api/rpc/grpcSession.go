@@ -17,11 +17,9 @@ package rpc
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
-	"time"
-	"crypto/tls"
 	"github.com/ODIM-Project/ODIM/lib-utilities/config"
 	sessiongrpcproto "github.com/ODIM-Project/ODIM/lib-utilities/proto/grpc/session"
 	"github.com/ODIM-Project/ODIM/lib-utilities/services"
@@ -29,6 +27,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"io/ioutil"
+	"time"
 )
 
 // GetAllActiveSessionRequest will do the rpc call to get session
@@ -46,16 +46,16 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 	}
 	log.Info("The value from etcd: ", resp)
 
-	// tlsCredentials, err := loadTLSCredentials()
-    // if err != nil {
-	// 	log.Fatal("cannot load TLS credentials: "+ err.Error())
-	// 	return nil, nil
-    // }
+	tlsCredentials, err := loadTLSCredentials()
+	if err != nil {
+		log.Fatal("cannot load TLS credentials: " + err.Error())
+		return nil, nil
+	}
 
 	conn, err := grpc.Dial(
 		string(resp.Kvs[0].Value),
-		grpc.WithInsecure(),
-		// grpc.WithTransportCredentials(tlsCredentials),
+		// grpc.WithInsecure(),
+		grpc.WithTransportCredentials(tlsCredentials),
 	)
 	if err != nil {
 		log.Error("While connecting with the GRPC, got: " + err.Error())
@@ -69,7 +69,7 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 			SessionToken: sessionToken,
 		},
 	)
-	
+
 	if err != nil && rsp == nil {
 		return nil, fmt.Errorf("error while trying to make get session service rpc call: %v", err)
 	}
@@ -77,23 +77,22 @@ func GetAllActiveSessionRequest(sessionID, sessionToken string) (*sessiongrpcpro
 	return rsp, err
 }
 
-
 func loadTLSCredentials() (credentials.TransportCredentials, error) {
-    // Load certificate of the CA who signed server's certificate
-    pemServerCA, err := ioutil.ReadFile(config.Data.KeyCertConf.RootCACertificatePath)
-    if err != nil {
-        return nil, err
-    }
+	// Load certificate of the CA who signed server's certificate
+	pemServerCA, err := ioutil.ReadFile(config.Data.KeyCertConf.RootCACertificatePath)
+	if err != nil {
+		return nil, err
+	}
 
-    certPool := x509.NewCertPool()
-    if !certPool.AppendCertsFromPEM(pemServerCA) {
-        return nil, fmt.Errorf("failed to add server CA's certificate")
-    }
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
 
-    // Create the credentials and return it
-    config := &tls.Config{
-        RootCAs:      certPool,
-    }
+	// Create the credentials and return it
+	config := &tls.Config{
+		RootCAs: certPool,
+	}
 
-    return credentials.NewTLS(config), nil
+	return credentials.NewTLS(config), nil
 }
