@@ -91,7 +91,8 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 
 	// Create the credentials and return it
 	config := &tls.Config{
-		RootCAs: certPool,
+		RootCAs:    certPool,
+		ServerName: config.Data.LocalhostFQDN,
 	}
 
 	return credentials.NewTLS(config), nil
