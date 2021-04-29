@@ -25,9 +25,11 @@ spec:
     spec:
       hostname: etcd
       subdomain: etcd
+      securityContext:
+        fsGroup: {{ .Values.odimra.groupID }}
       containers:
         - name: etcd
-          image: odim_etcd:{{ .Values.odimra.etcdImageTag }}
+          image: etcd:{{ .Values.odimra.etcdImageTag }}
           imagePullPolicy: IfNotPresent
           ports:
             - name: etcd-server

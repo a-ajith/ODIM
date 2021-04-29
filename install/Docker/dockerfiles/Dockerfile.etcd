@@ -22,8 +22,10 @@ LABEL description="etcd docker image built on top of ubuntu:18.04"
 
 WORKDIR /etcd/
 
-ARG ETCD_USER_ID
-ARG ETCD_GROUP_ID
+# userid and groupid of odimra user and odimra group respectively
+# which will present be on the host machine.
+ARG ODIMRA_USER_ID
+ARG ODIMRA_GROUP_ID
 
 RUN apt-get update -q=3 && apt-get -q install -q=3 -y \
         vim \
@@ -31,7 +33,7 @@ RUN apt-get update -q=3 && apt-get -q install -q=3 -y \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN if [ -z "$ETCD_USER_ID" ] || [ -z "$ETCD_GROUP_ID" ]; then echo "\n[$(date)] -- ERROR -- ETCD_USER_ID or ETCD_GROUP_ID is not set\n"; exit 1; fi \
+RUN if [ -z "$ODIMRA_USER_ID" ] || [ -z "$ODIMRA_GROUP_ID" ]; then echo "\n[$(date)] -- ERROR -- ODIMRA_USER_ID or ODIMRA_GROUP_ID is not set\n"; exit 1; fi \
 	&& mkdir -p /opt/etcd/bin /opt/etcd/data /opt/etcd/conf /opt/etcd/scripts /etcd/tmp \
         && export ETCD_IMAGE_URL=https://storage.googleapis.com/etcd/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz \
         && export ETCD_IMAGE_BUNDLE=etcd-v3.4.0-linux-amd64.tar.gz \
@@ -39,9 +41,9 @@ RUN if [ -z "$ETCD_USER_ID" ] || [ -z "$ETCD_GROUP_ID" ]; then echo "\n[$(date)]
         && tar -xzf /etcd/${ETCD_IMAGE_BUNDLE} --strip-components 1 -C /etcd/tmp \
         && mv -f /etcd/tmp/etcd* /opt/etcd/bin \
         && rm -rf /etcd \
-        && groupadd -r -g $ETCD_GROUP_ID etcd \
-	&& useradd -s /bin/bash -u $ETCD_USER_ID -m -d /home/etcd -r -g etcd etcd \
-	&& chown -R etcd:etcd /opt/etcd \
+        && groupadd -r -g $ODIMRA_GROUP_ID etcd \
+	&& useradd -s /bin/bash -u $ODIMRA_USER_ID -m -d /home/etcd -r -g etcd etcd \
+	&& chown -R odimra:odimra /opt/etcd \
 	&& chmod 0700 /opt/etcd/data
 
 #COPY --chown=etcd:etcd ./scripts/* /opt/etcd/scripts/
