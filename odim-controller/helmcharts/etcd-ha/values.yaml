@@ -4,3 +4,5 @@ odimra:
   etcdDirPath:
   etcdImageTag: "1.0"
   etcdNodePort:
+  etcdConfPath:
+  etcdDataPath:

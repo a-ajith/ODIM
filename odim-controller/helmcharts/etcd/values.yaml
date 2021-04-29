@@ -2,4 +2,5 @@ odimra:
   namespace:
   groupID:
   etcdImageTag: "1.0"
-  etcdNodePort:
+  etcdConfPath:
+  etcdDataPath:
